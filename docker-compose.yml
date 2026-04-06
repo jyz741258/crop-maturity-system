@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  crop-maturity:
+    build: .
+    container_name: crop-maturity-app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./reports:/app/reports
+      - ./temp:/app/temp
+      - ./models:/app/models
+      - ./data:/app/data
+    restart: unless-stopped
+    environment:
+      - FLASK_ENV=production

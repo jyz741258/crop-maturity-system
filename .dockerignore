@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.env
+.git/
+.gitignore
+uploads/
+reports/
+temp/
+*.log
+.DS_Store

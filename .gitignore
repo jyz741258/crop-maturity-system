@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+venv/
+env/
+
+# 项目临时文件
+uploads/
+reports/
+temp/
+*.log
+
+# Docker
+*.pid
+
+# IDE
+.vscode/
+.idea/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 敏感信息（重要！）
+*.env
+config_local.py
+
+# 训练数据（太大）
+data/raw/*.jpg
+data/raw/*.png
+models/*.pkl

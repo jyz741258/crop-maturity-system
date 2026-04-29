@@ -1,0 +1,622 @@
+class PageManager {
+    constructor() {
+        this.currentPage = 'dashboard';
+        this.sidebarCollapsed = false;
+        this.isLoading = false;
+        this.charts = window.CropCharts ? new CropCharts() : null;
+    }
+
+    init() {
+        this.bindAllEvents();
+        this.initMockData();
+        this.initCharts();
+    }
+
+    bindAllEvents() {
+        var self = this;
+        
+        document.querySelectorAll('.nav-link').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var page = link.dataset.page;
+                if (page) {
+                    self.loadPage(page);
+                }
+            });
+        });
+
+        document.querySelectorAll('.action-btn[data-action]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var action = btn.dataset.action;
+                self.handleQuickAction(action);
+            });
+        });
+
+        document.querySelectorAll('.crop-quick-select .crop-chip').forEach(function(chip) {
+            chip.addEventListener('click', function() {
+                document.querySelectorAll('.crop-quick-select .crop-chip').forEach(function(c) {
+                    c.classList.remove('active');
+                });
+                chip.classList.add('active');
+            });
+        });
+
+        var toggleBtn = document.getElementById('sidebarToggle');
+        var sidebar = document.getElementById('sidebar');
+        var mainContent = document.getElementById('mainContent');
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                self.sidebarCollapsed = !self.sidebarCollapsed;
+                if (sidebar) sidebar.classList.toggle('collapsed', self.sidebarCollapsed);
+                if (mainContent) mainContent.classList.toggle('sidebar-collapsed', self.sidebarCollapsed);
+            });
+        }
+
+        var themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                var icon = themeToggle.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('fa-moon');
+                    icon.classList.toggle('fa-sun');
+                }
+            });
+        }
+
+        var menu = document.querySelector('.user-menu');
+        var dropdown = document.getElementById('userDropdown');
+        if (menu) {
+            menu.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (dropdown) dropdown.classList.toggle('show');
+            });
+        }
+        document.addEventListener('click', function(e) {
+            if (menu && !menu.contains(e.target) && dropdown) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        document.querySelectorAll('.view-all').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                self.loadPage('history');
+            });
+        });
+
+        document.querySelectorAll('.recent-item').forEach(function(item) {
+            item.style.cursor = 'pointer';
+            item.addEventListener('click', function() {
+                self.loadPage('result');
+            });
+        });
+    }
+
+    handleQuickAction(action) {
+        switch (action) {
+            case 'new-analysis':
+                this.loadPage('analysis');
+                break;
+            case 'upload-video':
+                this.loadPage('batch');
+                break;
+            case 'generate-report':
+                this.loadPage('history');
+                break;
+        }
+    }
+
+    loadPage(pageName) {
+        var self = this;
+        if (this.isLoading) return;
+        if (pageName === this.currentPage) return;
+
+        this.isLoading = true;
+        this.showLoading();
+
+        fetch('/' + pageName)
+            .then(function(response) {
+                if (!response.ok) throw new Error('页面加载失败');
+                return response.text();
+            })
+            .then(function(content) {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(content, 'text/html');
+                var newMainContent = doc.querySelector('#mainContent');
+
+                var mainContent = document.getElementById('mainContent');
+                if (newMainContent && mainContent) {
+                    mainContent.innerHTML = newMainContent.innerHTML;
+                    self.currentPage = pageName;
+                    self.updateNavActive(pageName);
+                    self.bindAllEvents();
+                    self.initPageContent(pageName);
+                }
+
+                self.isLoading = false;
+                self.hideLoading();
+            })
+            .catch(function(error) {
+                console.error('Failed to load page:', error);
+                self.isLoading = false;
+                self.hideLoading();
+                self.showToast('页面加载失败', 'error');
+            });
+    }
+
+    updateNavActive(pageName) {
+        document.querySelectorAll('.nav-link').forEach(function(link) {
+            link.classList.remove('active');
+            if (link.dataset.page === pageName) {
+                link.classList.add('active');
+            }
+        });
+    }
+
+    initPageContent(pageName) {
+        switch (pageName) {
+            case 'dashboard':
+                this.initDashboard();
+                break;
+            case 'analysis':
+                this.initAnalysis();
+                break;
+            case 'batch':
+                this.initBatch();
+                break;
+            case 'history':
+                this.initHistory();
+                break;
+            case 'crops':
+                this.initCrops();
+                break;
+            case 'help':
+                this.initHelp();
+                break;
+            case 'result':
+                this.initResult();
+                break;
+        }
+    }
+
+    initDashboard() {
+        this.initCharts();
+        this.initMockData();
+    }
+
+    initAnalysis() {
+        this.setupImageUpload();
+        this.setupCropSelection();
+        this.setupAnalyzeButton();
+    }
+
+    initBatch() {
+        this.setupBatchUpload();
+        this.setupBatchProcess();
+    }
+
+    initHistory() {
+        this.loadHistoryData();
+        this.setupSearchFilter();
+    }
+
+    initCrops() {
+        this.loadCropList();
+    }
+
+    initHelp() {
+        this.setupHelpNavigation();
+    }
+
+    initResult() {
+        this.initCharts();
+    }
+
+    initCharts() {
+        if (!this.charts) return;
+        var self = this;
+
+        setTimeout(function() {
+            if (document.getElementById('maturityPie')) {
+                self.charts.initMaturityPieChart('maturityPie', self.charts.createMockData().pieData);
+            }
+            if (document.getElementById('trendChart')) {
+                self.charts.initTrendLineChart('trendChart', self.charts.createMockData().trendData);
+            }
+            if (document.getElementById('radarChart')) {
+                self.charts.initRadarChart('radarChart', self.charts.createMockData().radarData);
+            }
+            if (document.getElementById('qualityBar')) {
+                self.charts.initQualityBarChart('qualityBar', self.charts.createMockData().barData);
+            }
+            if (document.getElementById('resultRadar')) {
+                self.charts.initRadarChart('resultRadar', {
+                    labels: ['绿色占比', '纹理特征', '形态指标', '光谱特征', '综合评分'],
+                    values: [82, 75, 88, 78, 85]
+                });
+            }
+        }, 300);
+    }
+
+    initMockData() {
+        this.loadRecentList();
+        this.loadStatsSummary();
+    }
+
+    loadRecentList() {
+        var recentList = document.getElementById('recentList');
+        if (!recentList) return;
+
+        var mockRecent = [
+            { id: 1, name: '大田地块A.jpg', crop: '生菜', date: '10分钟前', matureRate: 75 },
+            { id: 2, name: '茶园航拍.mp4', crop: '茶叶', date: '30分钟前', matureRate: 82 },
+            { id: 3, name: '菠菜种植区.jpg', crop: '菠菜', date: '1小时前', matureRate: 68 }
+        ];
+
+        var self = this;
+        recentList.innerHTML = mockRecent.map(function(item) {
+            return '<div class="recent-item" style="cursor:pointer;">' +
+                '<div class="recent-thumb" style="background: linear-gradient(135deg, #2e7d32, #43a047);">' +
+                '<i class="fas fa-image"></i>' +
+                '</div>' +
+                '<div class="recent-info">' +
+                '<div class="recent-name">' + item.name + '</div>' +
+                '<div class="recent-meta">' + item.crop + ' · ' + item.date + '</div>' +
+                '</div>' +
+                '<div class="recent-rate">' + item.matureRate + '%</div>' +
+                '</div>';
+        }).join('');
+
+        recentList.querySelectorAll('.recent-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+                self.loadPage('result');
+            });
+        });
+    }
+
+    loadStatsSummary() {
+        var statValues = document.querySelectorAll('.stats-overview .stat-value');
+        var values = [24, 856, 78, 3];
+
+        for (var i = 0; i < statValues.length; i++) {
+            this.animateNumber(statValues[i], 0, values[i], 1500);
+        }
+    }
+
+    animateNumber(element, start, end, duration) {
+        var startTime = performance.now();
+        var animate = function(currentTime) {
+            var elapsed = currentTime - startTime;
+            var progress = Math.min(elapsed / duration, 1);
+            var easeOut = 1 - Math.pow(1 - progress, 3);
+            var current = Math.floor(start + (end - start) * easeOut);
+            element.textContent = current;
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        };
+        requestAnimationFrame(animate);
+    }
+
+    setupImageUpload() {
+        var uploadArea = document.getElementById('uploadArea');
+        var fileInput = document.getElementById('fileInput');
+        var previewSection = document.getElementById('previewSection');
+        var self = this;
+
+        if (!uploadArea || !fileInput) return;
+
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', function() {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            self.handleFileDrop(e.dataTransfer.files, previewSection);
+        });
+
+        fileInput.addEventListener('change', function(e) {
+            self.handleFileDrop(e.target.files, previewSection);
+        });
+
+        uploadArea.addEventListener('click', function() {
+            fileInput.click();
+        });
+    }
+
+    handleFileDrop(files, previewSection) {
+        var file = files[0];
+        var self = this;
+
+        if (file && file.type.startsWith('image/')) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                previewSection.innerHTML = '<img src="' + e.target.result + '" class="preview-image" alt="预览">' +
+                    '<div class="preview-info">' +
+                    '<span>' + file.name + '</span>' +
+                    '<span>' + (file.size / 1024).toFixed(1) + ' KB</span>' +
+                    '</div>';
+            };
+            reader.readAsDataURL(file);
+            self.showToast('图片上传成功', 'success');
+        }
+    }
+
+    setupCropSelection() {
+        document.querySelectorAll('.crop-chip').forEach(function(chip) {
+            chip.addEventListener('click', function() {
+                document.querySelectorAll('.crop-chip').forEach(function(c) {
+                    c.classList.remove('active');
+                });
+                chip.classList.add('active');
+            });
+        });
+    }
+
+    setupAnalyzeButton() {
+        var analyzeBtn = document.getElementById('analyzeBtn');
+        var self = this;
+
+        if (!analyzeBtn) return;
+
+        analyzeBtn.addEventListener('click', function() {
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = '<i class="fas fa-spinner" style="animation: spin 1s linear infinite;"></i> 分析中...';
+
+            setTimeout(function() {
+                self.loadPage('result');
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '<i class="fas fa-play"></i> 开始分析';
+            }, 2000);
+        });
+    }
+
+    setupBatchUpload() {
+        var dropZone = document.getElementById('batchDropZone');
+        var batchFileInput = document.getElementById('batchFileInput');
+        var self = this;
+
+        if (!dropZone || !batchFileInput) return;
+
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', function() {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            self.handleBatchDrop(e.dataTransfer.files);
+        });
+
+        batchFileInput.addEventListener('change', function(e) {
+            self.handleBatchDrop(e.target.files);
+        });
+
+        dropZone.addEventListener('click', function() {
+            batchFileInput.click();
+        });
+    }
+
+    handleBatchDrop(files) {
+        var fileGrid = document.getElementById('fileGrid');
+        var filesArray = Array.from(files).filter(function(f) {
+            return f.type.startsWith('image/');
+        });
+
+        filesArray.forEach(function(file, idx) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var fileCard = document.createElement('div');
+                fileCard.className = 'file-card';
+                fileCard.style.opacity = '0';
+                fileCard.style.animation = 'fade-in 0.3s ease-out ' + (idx * 0.05) + 's forwards';
+                fileCard.innerHTML = '<img src="' + e.target.result + '" alt="' + file.name + '">' +
+                    '<div class="file-info">' +
+                    '<span class="file-name">' + file.name + '</span>' +
+                    '<span class="file-size">' + (file.size / 1024).toFixed(1) + ' KB</span>' +
+                    '</div>' +
+                    '<div class="file-actions">' +
+                    '<button class="remove-btn"><i class="fas fa-times"></i></button>' +
+                    '</div>';
+                if (fileGrid) fileGrid.appendChild(fileCard);
+
+                var removeBtn = fileCard.querySelector('.remove-btn');
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', function() {
+                        fileCard.remove();
+                    });
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    setupBatchProcess() {
+        var processBtn = document.getElementById('processBatchBtn');
+        var progressBar = document.getElementById('batchProgress');
+
+        if (!processBtn) return;
+
+        processBtn.addEventListener('click', function() {
+            progressBar.style.display = 'block';
+            processBtn.disabled = true;
+
+            var progress = 0;
+            var progressBarElement = progressBar.querySelector('.progress-bar');
+            var progressText = progressBar.querySelector('.progress-text');
+            var self = this;
+
+            var updateProgress = function() {
+                if (progress <= 100) {
+                    progressBarElement.style.width = progress + '%';
+                    progressText.textContent = Math.floor(progress) + '%';
+                    progress += Math.random() * 15;
+                    setTimeout(updateProgress, 50);
+                } else {
+                    progressBarElement.style.width = '100%';
+                    progressText.textContent = '完成';
+                    setTimeout(function() {
+                        progressBar.style.display = 'none';
+                        processBtn.disabled = false;
+                        self.showToast('批量分析完成！', 'success');
+                    }, 500);
+                }
+            };
+            updateProgress();
+        }.bind(this));
+    }
+
+    loadHistoryData() {
+        var historyTable = document.getElementById('historyTable');
+        if (!historyTable) return;
+
+        var mockHistory = [
+            { id: 'REC-001', name: '大田地块A.jpg', crop: '生菜', date: '2024-01-15 14:30', matureRate: 75 },
+            { id: 'REC-002', name: '茶园航拍.mp4', crop: '茶叶', date: '2024-01-14 10:15', matureRate: 82 },
+            { id: 'REC-003', name: '菠菜种植区.jpg', crop: '菠菜', date: '2024-01-13 16:45', matureRate: 68 },
+            { id: 'REC-004', name: '芹菜基地.jpg', crop: '芹菜', date: '2024-01-12 09:20', matureRate: 90 },
+            { id: 'REC-005', name: '烟叶田块B.jpg', crop: '烟叶', date: '2024-01-11 11:30', matureRate: 73 }
+        ];
+
+        historyTable.innerHTML = mockHistory.map(function(item, idx) {
+            var rateClass = item.matureRate >= 80 ? 'high' : (item.matureRate >= 60 ? 'medium' : 'low');
+            return '<tr style="animation: fade-in 0.3s ease-out ' + (idx * 0.05) + 's forwards; opacity: 0;">' +
+                '<td>' + item.id + '</td>' +
+                '<td class="file-name-cell">' + item.name + '</td>' +
+                '<td>' + item.crop + '</td>' +
+                '<td>' + item.date + '</td>' +
+                '<td><span class="rate-badge ' + rateClass + '">' + item.matureRate + '%</span></td>' +
+                '<td>' +
+                '<button class="action-btn view-btn" onclick="pageManager.loadPage(\'result\')"><i class="fas fa-eye"></i></button>' +
+                '<button class="action-btn download-btn"><i class="fas fa-download"></i></button>' +
+                '<button class="action-btn delete-btn"><i class="fas fa-trash"></i></button>' +
+                '</td>' +
+                '</tr>';
+        }).join('');
+    }
+
+    setupSearchFilter() {
+        var searchInput = document.querySelector('.search-box input');
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(e) {
+            var query = e.target.value.toLowerCase();
+            var tableRows = document.querySelectorAll('#historyTable tr');
+            tableRows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        });
+    }
+
+    loadCropList() {
+        var cropGrid = document.getElementById('cropGrid');
+        if (!cropGrid) return;
+
+        var crops = [
+            { id: 'tea', name: '茶叶', icon: '🍵', desc: '适制高档绿茶、名优茶', standards: 'GB/T 23776-2018' },
+            { id: 'tobacco', name: '烟叶', icon: '🚬', desc: '最佳采收期，品质最优', standards: 'GB 2635-2018' },
+            { id: 'mulberry', name: '桑叶', icon: '🐛', desc: '适用于大蚕饲养', standards: 'NY/T 1187-2006' },
+            { id: 'lettuce', name: '生菜', icon: '🥬', desc: '商品价值最高', standards: 'GB/T 18407.1-2001' },
+            { id: 'spinach', name: '菠菜', icon: '🌿', desc: '营养丰富', standards: 'NY/T 5008-2016' },
+            { id: 'celery', name: '芹菜', icon: '🥕', desc: '叶柄粗壮，口感脆嫩', standards: 'NY/T 5008-2016' }
+        ];
+
+        cropGrid.innerHTML = crops.map(function(crop, idx) {
+            return '<div class="crop-card" style="animation: fade-in 0.3s ease-out ' + (idx * 0.1) + 's forwards; opacity: 0;">' +
+                '<div class="crop-icon">' + crop.icon + '</div>' +
+                '<div class="crop-name">' + crop.name + '</div>' +
+                '<div class="crop-desc">' + crop.desc + '</div>' +
+                '<div class="crop-standards">' + crop.standards + '</div>' +
+                '<button class="btn btn-primary btn-sm" onclick="pageManager.loadPage(\'analysis\')">选择</button>' +
+                '</div>';
+        }).join('');
+    }
+
+    setupHelpNavigation() {
+        var helpItems = document.querySelectorAll('.help-item');
+
+        helpItems.forEach(function(item) {
+            item.addEventListener('click', function() {
+                helpItems.forEach(function(i) {
+                    i.classList.remove('active');
+                });
+                item.classList.add('active');
+
+                var contentId = item.dataset.content;
+                document.querySelectorAll('.help-content').forEach(function(c) {
+                    c.style.display = 'none';
+                });
+                var content = document.getElementById(contentId);
+                if (content) {
+                    content.style.display = 'block';
+                }
+            });
+        });
+    }
+
+    showLoading() {
+        var loadingOverlay = document.createElement('div');
+        loadingOverlay.className = 'loading-overlay';
+        loadingOverlay.innerHTML = '<div class="spinner-container">' +
+            '<div class="spinner" style="animation: spin 1s linear infinite;"></div>' +
+            '<span>加载中...</span>' +
+            '</div>';
+        document.body.appendChild(loadingOverlay);
+    }
+
+    hideLoading() {
+        var loadingOverlay = document.querySelector('.loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.remove();
+        }
+    }
+
+    showToast(message, type) {
+        if (type === undefined) type = 'success';
+        
+        var toast = document.createElement('div');
+        toast.className = 'toast toast-' + type;
+        toast.style.animation = 'fade-in 0.3s ease-out';
+        
+        var iconClass = 'check-circle';
+        if (type === 'error') iconClass = 'exclamation-circle';
+        else if (type === 'info') iconClass = 'info-circle';
+        
+        toast.innerHTML = '<i class="fas fa-' + iconClass + '"></i>' +
+            '<span>' + message + '</span>' +
+            '<button class="toast-close"><i class="fas fa-times"></i></button>';
+
+        document.body.appendChild(toast);
+
+        var closeBtn = toast.querySelector('.toast-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                toast.remove();
+            });
+        }
+
+        setTimeout(function() {
+            toast.remove();
+        }, 4000);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    window.pageManager = new PageManager();
+    window.pageManager.init();
+});

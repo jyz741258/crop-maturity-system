@@ -8,3 +8,4 @@ Pillow==10.0.1
 matplotlib==3.7.2
 pandas==2.0.3
 seaborn==0.12.2
+ultralytics==8.0.200

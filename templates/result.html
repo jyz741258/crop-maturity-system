@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌾 作物成熟度分析系统 - 分析结果</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/animations.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="app-container">
+        {% include 'sidebar.html' %}
+
+        <main class="main-content" id="mainContent">
+            <div class="page-header animate-fade-in">
+                <h1>分析结果</h1>
+                <p>检测完成，以下是详细分析报告</p>
+                <div class="header-actions">
+                    <button class="btn btn-primary"><i class="fas fa-download"></i> 下载报告</button>
+                    <button class="btn btn-outline" onclick="pageManager.loadPage('analysis')"><i class="fas fa-arrow-left"></i> 返回分析</button>
+                </div>
+            </div>
+
+            <div class="result-container">
+                <div class="result-left animate-fade-in" style="animation-delay: 0.1s">
+                    <div class="image-comparison">
+                        <div class="comparison-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-image"></i> 原图</h3>
+                                <span class="image-info">大田地块A.jpg</span>
+                            </div>
+                            <div class="image-placeholder">
+                                <i class="fas fa-image"></i>
+                                <span>原图展示区</span>
+                            </div>
+                        </div>
+
+                        <div class="comparison-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-tag"></i> 标注图</h3>
+                                <span class="image-info">已标注 42 个目标</span>
+                            </div>
+                            <div class="image-placeholder">
+                                <i class="fas fa-tag"></i>
+                                <span>标注结果展示区</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-right">
+                    <div class="maturity-gauge animate-fade-in" style="animation-delay: 0.2s">
+                        <div class="gauge-container">
+                            <div class="gauge-ring">
+                                <svg viewBox="0 0 100 100" class="gauge-svg">
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#e0e0e0" stroke-width="8"/>
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#2e7d32" stroke-width="8"
+                                            stroke-dasharray="283" stroke-dashoffset="85" stroke-linecap="round"/>
+                                </svg>
+                                <div class="gauge-center">
+                                    <div class="gauge-value">72%</div>
+                                    <div class="gauge-label">综合成熟率</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-summary animate-fade-in" style="animation-delay: 0.3s">
+                        <div class="summary-item mature">
+                            <div class="summary-value">25</div>
+                            <div class="summary-label">成熟期</div>
+                            <div class="summary-bar"><div style="width: 100%"></div></div>
+                        </div>
+                        <div class="summary-item young">
+                            <div class="summary-value">12</div>
+                            <div class="summary-label">幼嫩期</div>
+                            <div class="summary-bar"><div style="width: 48%"></div></div>
+                        </div>
+                        <div class="summary-item overripe">
+                            <div class="summary-value">4</div>
+                            <div class="summary-label">过熟期</div>
+                            <div class="summary-bar"><div style="width: 16%"></div></div>
+                        </div>
+                        <div class="summary-item senescence">
+                            <div class="summary-value">1</div>
+                            <div class="summary-label">衰老期</div>
+                            <div class="summary-bar"><div style="width: 4%"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="radar-section animate-fade-in" style="animation-delay: 0.4s">
+                        <div class="card-header">
+                            <h3><i class="fas fa-radar"></i> 特征分析雷达图</h3>
+                        </div>
+                        <div class="chart-container small">
+                            <canvas id="resultRadar"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section animate-fade-in" style="animation-delay: 0.5s">
+                <div class="card-header">
+                    <h3><i class="fas fa-list"></i> 检测目标详情</h3>
+                    <span>共 42 个检测目标</span>
+                </div>
+                <div class="detail-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>编号</th>
+                                <th>位置</th>
+                                <th>成熟度</th>
+                                <th>置信度</th>
+                                <th>绿色占比</th>
+                                <th>品质评分</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="recommendations animate-fade-in" style="animation-delay: 0.6s">
+                <div class="card-header">
+                    <h3><i class="fas fa-lightbulb"></i> 采收建议</h3>
+                </div>
+                <div class="recommendation-content">
+                    <div class="recommendation-item good">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <h4>当前状态良好</h4>
+                            <p>检测区域内约 59.5% 的作物已达到成熟期，建议尽快安排采收。</p>
+                        </div>
+                    </div>
+                    <div class="recommendation-item info">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <h4>分批采收策略</h4>
+                            <p>建议优先采收成熟期作物，幼嫩期作物可继续生长 5-7 天后再进行检测。</p>
+                        </div>
+                    </div>
+                    <div class="recommendation-item warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>
+                            <h4>注意事项</h4>
+                            <p>有 5 株作物已进入过熟/衰老期，建议加强田间管理，及时清理。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tbody = document.getElementById('detailTableBody');
+            const stages = ['成熟期', '幼嫩期', '成熟期', '过熟期', '成熟期', '幼嫩期', '成熟期', '幼嫩期', '成熟期', '衰老期'];
+            const confidences = [92, 85, 88, 76, 95, 82, 90, 87, 89, 65];
+            const greenRatios = [0.42, 0.48, 0.40, 0.32, 0.43, 0.46, 0.41, 0.45, 0.40, 0.18];
+            const qualityScores = [95, 90, 94, 75, 96, 88, 93, 91, 92, 40];
+
+            for (let i = 1; i <= 10; i++) {
+                const row = document.createElement('tr');
+                row.className = 'animate-fade-in';
+                row.style.animationDelay = `${i * 0.05}s`;
+                row.innerHTML = `
+                    <td>${i}</td>
+                    <td>[${Math.floor(Math.random() * 600)}, ${Math.floor(Math.random() * 400)}]</td>
+                    <td><span class="maturity-badge ${stages[i-1]}">${stages[i-1]}</span></td>
+                    <td>${confidences[i-1]}%</td>
+                    <td>${(greenRatios[i-1] * 100).toFixed(1)}%</td>
+                    <td><span class="quality-score ${qualityScores[i-1] >= 90 ? 'high' : qualityScores[i-1] >= 70 ? 'medium' : 'low'}">${qualityScores[i-1]}</span></td>
+                `;
+                tbody.appendChild(row);
+            }
+        });
+    </script>
+    <script src="/static/js/charts.js"></script>
+    <script src="/static/js/page.js"></script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌾 作物成熟度分析系统 - 作物库</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/animations.css">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="app-container">
+        {% include 'sidebar.html' %}
+        
+        <main class="main-content" id="mainContent">
+            <div class="page-header animate-fade-in">
+                <h1>作物库</h1>
+                <p>管理和查看支持的作物类型及其成熟度标准</p>
+            </div>
+
+            <div class="crop-categories animate-fade-in" style="animation-delay: 0.1s">
+                <button class="category-btn active" data-category="all">全部</button>
+                <button class="category-btn" data-category="economic">经济作物</button>
+                <button class="category-btn" data-category="leafy">叶菜类</button>
+            </div>
+
+            <div class="crop-grid" id="cropGrid">
+                <div class="crop-card animate-fade-in" style="animation-delay: 0.2s">
+                    <div class="crop-header">
+                        <span class="crop-icon-large">🍵</span>
+                        <span class="crop-badge economic">经济作物</span>
+                    </div>
+                    <h3 class="crop-name">茶叶</h3>
+                    <p class="crop-scientific">Camellia sinensis</p>
+                    <p class="crop-desc">适制高档绿茶、名优茶，春季3-4月和秋季9-10月为最佳采收期。</p>
+                    <div class="crop-standards">
+                        <span>参考标准: GB/T 23776-2018</span>
+                    </div>
+                    <div class="crop-stages">
+                        <div class="stage-item">
+                            <span class="stage-icon">🌱</span>
+                            <span>幼嫩期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🌿</span>
+                            <span>成熟期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🍂</span>
+                            <span>过熟期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🥀</span>
+                            <span>衰老期</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm">选择分析</button>
+                </div>
+
+                <div class="crop-card animate-fade-in" style="animation-delay: 0.25s">
+                    <div class="crop-header">
+                        <span class="crop-icon-large">🚬</span>
+                        <span class="crop-badge economic">经济作物</span>
+                    </div>
+                    <h3 class="crop-name">烟叶</h3>
+                    <p class="crop-scientific">Nicotiana tabacum</p>
+                    <p class="crop-desc">最佳采收期在移栽后60-75天，叶片适中、颜色深绿时品质最优。</p>
+                    <div class="crop-standards">
+                        <span>参考标准: GB 2635-2018</span>
+                    </div>
+                    <div class="crop-stages">
+                        <div class="stage-item">
+                            <span class="stage-icon">🌱</span>
+                            <span>幼嫩期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🌿</span>
+                            <span>成熟期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🍂</span>
+                            <span>过熟期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🥀</span>
+                            <span>衰老期</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm">选择分析</button>
+                </div>
+
+                <div class="crop-card animate-fade-in" style="animation-delay: 0.3s">
+                    <div class="crop-header">
+                        <span class="crop-icon-large">🐛</span>
+                        <span class="crop-badge economic">经济作物</span>
+                    </div>
+                    <h3 class="crop-name">桑叶</h3>
+                    <p class="crop-scientific">Morus alba</p>
+                    <p class="crop-desc">适用于蚕桑养殖，春蚕期4-5月、秋蚕期9-10月为最佳采收期。</p>
+                    <div class="crop-standards">
+                        <span>参考标准: NY/T 1187-2006</span>
+                    </div>
+                    <div class="crop-stages">
+                        <div class="stage-item">
+                            <span class="stage-icon">🌱</span>
+                            <span>幼嫩期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🌿</span>
+                            <span>成熟期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🍂</span>
+                            <span>过熟期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🥀</span>
+                            <span>衰老期</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm">选择分析</button>
+                </div>
+
+                <div class="crop-card animate-fade-in" style="animation-delay: 0.35s">
+                    <div class="crop-header">
+                        <span class="crop-icon-large">🥬</span>
+                        <span class="crop-badge leafy">叶菜类</span>
+                    </div>
+                    <h3 class="crop-name">生菜</h3>
+                    <p class="crop-scientific">Lactuca sativa</p>
+                    <p class="crop-desc">播种后40-60天为最佳采收期，叶片充分展开时商品价值最高。</p>
+                    <div class="crop-standards">
+                        <span>参考标准: GB/T 18407.1-2001</span>
+                    </div>
+                    <div class="crop-stages">
+                        <div class="stage-item">
+                            <span class="stage-icon">🌱</span>
+                            <span>幼嫩期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🌿</span>
+                            <span>成熟期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🍂</span>
+                            <span>过熟期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🥀</span>
+                            <span>衰老期</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm">选择分析</button>
+                </div>
+
+                <div class="crop-card animate-fade-in" style="animation-delay: 0.4s">
+                    <div class="crop-header">
+                        <span class="crop-icon-large">🌿</span>
+                        <span class="crop-badge leafy">叶菜类</span>
+                    </div>
+                    <h3 class="crop-name">菠菜</h3>
+                    <p class="crop-scientific">Spinacia oleracea</p>
+                    <p class="crop-desc">播种后30-45天采收，真叶5-7片时叶片肥厚、营养丰富。</p>
+                    <div class="crop-standards">
+                        <span>参考标准: NY/T 5008-2016</span>
+                    </div>
+                    <div class="crop-stages">
+                        <div class="stage-item">
+                            <span class="stage-icon">🌱</span>
+                            <span>幼嫩期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🌿</span>
+                            <span>成熟期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🍂</span>
+                            <span>过熟期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🥀</span>
+                            <span>衰老期</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm">选择分析</button>
+                </div>
+
+                <div class="crop-card animate-fade-in" style="animation-delay: 0.45s">
+                    <div class="crop-header">
+                        <span class="crop-icon-large">🥕</span>
+                        <span class="crop-badge leafy">叶菜类</span>
+                    </div>
+                    <h3 class="crop-name">芹菜</h3>
+                    <p class="crop-scientific">Apium graveolens</p>
+                    <p class="crop-desc">定植后60-90天采收，叶柄粗壮、颜色翠绿时品质最优。</p>
+                    <div class="crop-standards">
+                        <span>参考标准: NY/T 5008-2016</span>
+                    </div>
+                    <div class="crop-stages">
+                        <div class="stage-item">
+                            <span class="stage-icon">🌱</span>
+                            <span>幼嫩期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🌿</span>
+                            <span>成熟期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🍂</span>
+                            <span>过熟期</span>
+                        </div>
+                        <div class="stage-item">
+                            <span class="stage-icon">🥀</span>
+                            <span>衰老期</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm">选择分析</button>
+                </div>
+            </div>
+
+            <div class="crop-guide animate-fade-in" style="animation-delay: 0.5s">
+                <h3><i class="fas fa-info-circle"></i> 作物选择指南</h3>
+                <div class="guide-content">
+                    <div class="guide-item">
+                        <h4>🌱 幼嫩期</h4>
+                        <p>叶片鲜嫩，颜色翠绿，适合继续生长或采收嫩苗。</p>
+                    </div>
+                    <div class="guide-item">
+                        <h4>🌿 成熟期</h4>
+                        <p>叶片饱满，颜色深绿，达到最佳品质，是采收的最佳时机。</p>
+                    </div>
+                    <div class="guide-item">
+                        <h4>🍂 过熟期</h4>
+                        <p>叶片开始老化，颜色变浅，应尽快采收以避免品质下降。</p>
+                    </div>
+                    <div class="guide-item">
+                        <h4>🥀 衰老期</h4>
+                        <p>叶片黄化干枯，失去采收价值，建议清理。</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/page.js"></script>
+</body>
+</html>

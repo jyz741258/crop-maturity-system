@@ -1,0 +1,12 @@
+首先启动 Flask 应用 （保持运行）：
+cd E:\crop-maturity-system
+venv\Scripts\activate
+python app.py
+
+此时应用会在 http://localhost:5000 运行。
+打开新的命令行窗口 ，进入项目目录：
+cd E:\crop-maturity-system
+
+运行 ngrok 进行内网穿透 ：
+ngrok.exe http 5000
+

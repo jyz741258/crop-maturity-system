@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌾 作物成熟度分析系统 - 帮助中心</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/animations.css">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="app-container">
+        {% include 'sidebar.html' %}
+        
+        <main class="main-content" id="mainContent">
+            <div class="page-header animate-fade-in">
+                <h1>帮助中心</h1>
+                <p>了解如何使用作物成熟度分析系统</p>
+            </div>
+
+            <div class="help-container">
+                <div class="help-sidebar animate-fade-in" style="animation-delay: 0.1s">
+                    <div class="help-item active" data-content="overview">
+                        <i class="fas fa-home"></i>
+                        <span>系统概述</span>
+                    </div>
+                    <div class="help-item" data-content="upload">
+                        <i class="fas fa-upload"></i>
+                        <span>上传图片</span>
+                    </div>
+                    <div class="help-item" data-content="analysis">
+                        <i class="fas fa-search"></i>
+                        <span>分析流程</span>
+                    </div>
+                    <div class="help-item" data-content="results">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>解读结果</span>
+                    </div>
+                    <div class="help-item" data-content="batch">
+                        <i class="fas fa-layer-group"></i>
+                        <span>批量分析</span>
+                    </div>
+                    <div class="help-item" data-content="faq">
+                        <i class="fas fa-question-circle"></i>
+                        <span>常见问题</span>
+                    </div>
+                </div>
+
+                <div class="help-content-container animate-fade-in" style="animation-delay: 0.2s">
+                    <div id="overview" class="help-content active">
+                        <h2><i class="fas fa-home"></i> 系统概述</h2>
+                        <p>作物成熟度分析系统是一款基于计算机视觉技术的智能农业辅助工具，帮助农户和农业从业者快速准确地判断作物的成熟度。</p>
+                        
+                        <div class="feature-cards">
+                            <div class="feature-card">
+                                <i class="fas fa-image"></i>
+                                <h3>图片分析</h3>
+                                <p>支持单张图片上传和分析，快速获取作物成熟度信息。</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-video"></i>
+                                <h3>视频分析</h3>
+                                <p>支持视频文件分析，获取时序上的作物生长变化趋势。</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-layer-group"></i>
+                                <h3>批量处理</h3>
+                                <p>支持批量上传多张图片，高效处理大规模检测任务。</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-chart-pie"></i>
+                                <h3>数据可视化</h3>
+                                <p>丰富的图表展示，直观呈现分析结果和统计数据。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="upload" class="help-content">
+                        <h2><i class="fas fa-upload"></i> 上传图片</h2>
+                        <ol>
+                            <li>点击左侧导航栏的"单图分析"或"批量分析"选项。</li>
+                            <li>在上传区域点击或拖拽图片文件到指定区域。</li>
+                            <li>支持的图片格式: JPG、PNG、BMP、TIFF。</li>
+                            <li>单张图片大小限制为50MB，批量上传最多支持20张。</li>
+                        </ol>
+                        <div class="tips-box">
+                            <h4>💡 温馨提示</h4>
+                            <ul>
+                                <li>建议上传清晰、光照均匀的作物图片</li>
+                                <li>尽量避免图片中有过多遮挡物</li>
+                                <li>批量上传时确保图片命名规范便于识别</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="analysis" class="help-content">
+                        <h2><i class="fas fa-search"></i> 分析流程</h2>
+                        <div class="step-by-step">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h4>选择作物类型</h4>
+                                    <p>从作物库中选择要分析的作物类型，系统支持茶叶、烟叶、桑叶、生菜、菠菜、芹菜等多种作物。</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h4>调整参数</h4>
+                                    <p>根据实际需求调整检测敏感度和置信度阈值参数。</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h4>开始分析</h4>
+                                    <p>点击"开始分析"按钮，系统将自动检测图片中的作物并分析成熟度。</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h4>查看结果</h4>
+                                    <p>分析完成后，查看检测结果和采收建议。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="results" class="help-content">
+                        <h2><i class="fas fa-chart-bar"></i> 解读结果</h2>
+                        <p>分析结果包含以下几个关键指标：</p>
+                        <div class="result-explanation">
+                            <div class="explanation-item">
+                                <h4>🌱 幼嫩期</h4>
+                                <p>作物处于生长初期，叶片鲜嫩，建议继续生长一段时间后再采收。</p>
+                            </div>
+                            <div class="explanation-item">
+                                <h4>🌿 成熟期</h4>
+                                <p>作物达到最佳采收状态，品质最优，建议尽快采收。</p>
+                            </div>
+                            <div class="explanation-item">
+                                <h4>🍂 过熟期</h4>
+                                <p>作物开始老化，品质有所下降，建议尽快采收以减少损失。</p>
+                            </div>
+                            <div class="explanation-item">
+                                <h4>🥀 衰老期</h4>
+                                <p>作物已失去采收价值，建议清理或作为肥料处理。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="batch" class="help-content">
+                        <h2><i class="fas fa-layer-group"></i> 批量分析</h2>
+                        <p>批量分析功能允许您同时处理多张图片，提高工作效率。</p>
+                        <ol>
+                            <li>进入"批量分析"页面</li>
+                            <li>拖拽多张图片到上传区域或点击选择文件</li>
+                            <li>选择目标作物类型</li>
+                            <li>点击"开始批量分析"按钮</li>
+                            <li>等待分析完成后查看汇总结果</li>
+                        </ol>
+                        <div class="tips-box">
+                            <h4>💡 批量分析优势</h4>
+                            <ul>
+                                <li>一次性处理多张图片，节省时间</li>
+                                <li>统一设置，保证分析标准一致</li>
+                                <li>生成汇总报告，便于对比分析</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="faq" class="help-content">
+                        <h2><i class="fas fa-question-circle"></i> 常见问题</h2>
+                        <div class="faq-list">
+                            <div class="faq-item">
+                                <h4>为什么上传的图片无法分析？</h4>
+                                <p>请检查图片格式是否正确（支持JPG、PNG、BMP），图片大小是否超过50MB，以及图片内容是否包含清晰的作物目标。</p>
+                            </div>
+                            <div class="faq-item">
+                                <h4>分析结果不准确怎么办？</h4>
+                                <p>可以尝试调整检测敏感度参数，上传更清晰的图片，或者联系技术支持进行模型优化。</p>
+                            </div>
+                            <div class="faq-item">
+                                <h4>支持哪些作物类型？</h4>
+                                <p>目前支持茶叶、烟叶、桑叶、生菜、菠菜、芹菜六种作物，我们会持续增加支持的作物类型。</p>
+                            </div>
+                            <div class="faq-item">
+                                <h4>如何下载分析报告？</h4>
+                                <p>分析完成后，点击页面上的"下载报告"按钮即可导出CSV格式的分析报告。</p>
+                            </div>
+                            <div class="faq-item">
+                                <h4>历史记录可以保存多久？</h4>
+                                <p>系统会永久保存您的分析记录，您可以随时在"历史记录"页面查看和管理。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/page.js"></script>
+</body>
+</html>

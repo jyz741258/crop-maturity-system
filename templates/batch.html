@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌾 作物成熟度分析系统 - 批量分析</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/animations.css">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="app-container">
+        {% include 'sidebar.html' %}
+        
+        <main class="main-content" id="mainContent">
+            <div class="page-header animate-fade-in">
+                <h1>批量分析</h1>
+                <p>同时上传多张图片进行批量检测</p>
+            </div>
+
+            <div class="batch-container">
+                <div class="upload-zone animate-fade-in" style="animation-delay: 0.1s">
+                    <div class="drop-zone" id="batchDropZone">
+                        <div class="drop-icon">
+                            <i class="fas fa-images"></i>
+                        </div>
+                        <p>拖拽图片到此处或点击选择</p>
+                        <p class="drop-hint">支持多选，每次最多上传 20 张图片</p>
+                        <input type="file" id="batchFileInput" accept="image/*" multiple style="display: none">
+                    </div>
+                    
+                    <div class="file-grid" id="fileGrid"></div>
+                </div>
+
+                <div class="batch-settings animate-fade-in" style="animation-delay: 0.2s">
+                    <div class="section-header">
+                        <h2><i class="fas fa-cog"></i> 批量设置</h2>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="setting-item">
+                            <label>目标作物</label>
+                            <select class="setting-select">
+                                <option value="tea">茶叶</option>
+                                <option value="lettuce">生菜</option>
+                                <option value="spinach">菠菜</option>
+                                <option value="celery">芹菜</option>
+                                <option value="tobacco">烟叶</option>
+                                <option value="mulberry">桑叶</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" checked>
+                                <span>自动下载分析报告</span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" checked>
+                                <span>保存分析结果到历史记录</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="batch-progress" id="batchProgress" style="display: none;">
+                    <div class="progress-header">
+                        <span><i class="fas fa-spinner animate-spin"></i> 正在分析...</span>
+                        <span class="progress-text">0%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar"></div>
+                    </div>
+                    <div class="progress-info">
+                        <span id="progressCurrent">0</span> / <span id="progressTotal">0</span> 完成
+                    </div>
+                </div>
+
+                <div class="batch-actions animate-fade-in" style="animation-delay: 0.3s">
+                    <button class="btn btn-primary btn-lg" id="processBatchBtn">
+                        <i class="fas fa-play"></i>
+                        开始批量分析
+                    </button>
+                    <button class="btn btn-outline btn-lg" id="clearBatchBtn">
+                        <i class="fas fa-trash"></i>
+                        清空列表
+                    </button>
+                </div>
+            </div>
+
+            <div class="batch-results" id="batchResults" style="display: none;">
+                <div class="page-header animate-fade-in">
+                    <h1>批量分析结果</h1>
+                    <p>共分析 <span id="totalCount">0</span> 张图片</p>
+                </div>
+                
+                <div class="results-summary animate-fade-in" style="animation-delay: 0.1s">
+                    <div class="summary-card">
+                        <div class="summary-icon total">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <div class="summary-info">
+                            <div class="summary-value" id="summaryTotal">0</div>
+                            <div class="summary-label">图片总数</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon mature">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="summary-info">
+                            <div class="summary-value" id="summaryMature">0</div>
+                            <div class="summary-label">成熟作物</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon avg">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div class="summary-info">
+                            <div class="summary-value" id="summaryAvg">0%</div>
+                            <div class="summary-label">平均成熟率</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="results-grid animate-fade-in" style="animation-delay: 0.2s" id="resultsGrid"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/page.js"></script>
+</body>
+</html>

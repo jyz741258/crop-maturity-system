@@ -55,8 +55,8 @@
                 <i class="fas fa-user"></i>
             </div>
             <div class="user-info">
-                <span class="user-name">管理员</span>
-                <span class="user-role">系统管理员</span>
+                <span class="user-name">{{ username if username else '访客' }}</span>
+                <span class="user-role">{% if username == '管理员' %}系统管理员{% else %}普通用户{% endif %}</span>
             </div>
             <i class="fas fa-chevron-down"></i>
         </div>
@@ -67,6 +67,6 @@
         <a href="#settings"><i class="fas fa-cog"></i> 系统设置</a>
         <a href="#help-center"><i class="fas fa-question-circle"></i> 帮助中心</a>
         <hr>
-        <a href="#logout"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
+        <a href="/logout"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
     </div>
 </nav>

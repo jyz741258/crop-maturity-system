@@ -10,3 +10,6 @@ cd E:\crop-maturity-system
 运行 ngrok 进行内网穿透 ：
 ngrok.exe http 5000
 
+登录账号：
+
+用户名 密码 角色 admin admin123 管理员 user user123 普通用户

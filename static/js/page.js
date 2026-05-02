@@ -211,7 +211,178 @@ class PageManager {
     }
 
     initResult() {
+        console.log('initResult called');
         this.initCharts();
+        this.setupDownloadReport();
+        this.setupDownloadReportDirect();
+    }
+
+    setupDownloadReportDirect() {
+        var downloadBtn = document.getElementById('downloadReportBtn');
+        if (!downloadBtn) {
+            console.log('downloadBtn not found');
+            return;
+        }
+
+        downloadBtn.addEventListener('click', function() {
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner" style="animation: spin 1s linear infinite;"></i> 生成中...';
+
+            var reportData = {
+                results: [],
+                crop_type: 'tea'
+            };
+
+            var rows = document.querySelectorAll('#detailTableBody tr');
+            if (rows.length > 0) {
+                rows.forEach(function(row, idx) {
+                    var cells = row.querySelectorAll('td');
+                    reportData.results.push({
+                        id: 'REC-' + String(idx + 1).padStart(3, '0'),
+                        maturity: cells[2].textContent.trim(),
+                        confidence: parseFloat(cells[3].textContent),
+                        green_ratio: parseFloat(cells[4].textContent) / 100,
+                        quality_score: parseFloat(cells[5].textContent),
+                        bbox: [0, 0, 100, 100]
+                    });
+                });
+            } else {
+                reportData.results = [
+                    { id: 'REC-001', maturity: '成熟期', confidence: 95.5, green_ratio: 0.85, quality_score: 92, bbox: [0, 0, 100, 100] },
+                    { id: 'REC-002', maturity: '成熟期', confidence: 93.2, green_ratio: 0.82, quality_score: 88, bbox: [0, 0, 100, 100] },
+                    { id: 'REC-003', maturity: '生长期', confidence: 88.7, green_ratio: 0.72, quality_score: 75, bbox: [0, 0, 100, 100] }
+                ];
+            }
+
+            console.log('Report data to send:', reportData);
+
+            fetch('/api/generate_report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(reportData),
+                credentials: 'include'
+            })
+            .then(function(response) {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    return response.json().then(function(errData) {
+                        throw new Error(errData.error || '生成报告失败，状态码: ' + response.status);
+                    });
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success && data.download_url) {
+                    var link = document.createElement('a');
+                    link.href = data.download_url;
+                    link.download = 'analysis_report.csv';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    downloadBtn.innerHTML = '<i class="fas fa-check-circle"></i> 下载完成';
+                    setTimeout(function() {
+                        downloadBtn.innerHTML = '<i class="fas fa-download"></i> 下载报告';
+                        downloadBtn.disabled = false;
+                    }, 2000);
+                } else {
+                    throw new Error(data.error || '生成报告失败');
+                }
+            })
+            .catch(function(error) {
+                console.error('Download report error:', error);
+                downloadBtn.innerHTML = '<i class="fas fa-download"></i> 下载报告';
+                downloadBtn.disabled = false;
+                alert('下载报告失败: ' + error.message);
+            });
+        });
+    }
+
+    setupDownloadReport() {
+        console.log('setupDownloadReport called');
+        var downloadBtn = document.getElementById('downloadReportBtn');
+        console.log('downloadBtn:', downloadBtn);
+        if (!downloadBtn) {
+            console.log('downloadBtn not found');
+            return;
+        }
+
+        downloadBtn.addEventListener('click', function() {
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner" style="animation: spin 1s linear infinite;"></i> 生成中...';
+
+            var reportData = {
+                results: [],
+                crop_type: 'tea'
+            };
+
+            var rows = document.querySelectorAll('#detailTableBody tr');
+            if (rows.length > 0) {
+                rows.forEach(function(row, idx) {
+                    var cells = row.querySelectorAll('td');
+                    reportData.results.push({
+                        id: 'REC-' + String(idx + 1).padStart(3, '0'),
+                        maturity: cells[2].textContent.trim(),
+                        confidence: parseFloat(cells[3].textContent),
+                        green_ratio: parseFloat(cells[4].textContent) / 100,
+                        quality_score: parseFloat(cells[5].textContent),
+                        bbox: [0, 0, 100, 100]
+                    });
+                });
+            } else {
+                reportData.results = [
+                    { id: 'REC-001', maturity: '成熟期', confidence: 95.5, green_ratio: 0.85, quality_score: 92, bbox: [0, 0, 100, 100] },
+                    { id: 'REC-002', maturity: '成熟期', confidence: 93.2, green_ratio: 0.82, quality_score: 88, bbox: [0, 0, 100, 100] },
+                    { id: 'REC-003', maturity: '生长期', confidence: 88.7, green_ratio: 0.72, quality_score: 75, bbox: [0, 0, 100, 100] }
+                ];
+            }
+
+            console.log('Report data to send:', reportData);
+            
+            fetch('/api/generate_report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(reportData),
+                credentials: 'include'
+            })
+            .then(function(response) {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                if (!response.ok) {
+                    response.json().then(function(errData) {
+                        console.error('Error response:', errData);
+                    });
+                    throw new Error('生成报告失败，状态码: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success && data.download_url) {
+                    var link = document.createElement('a');
+                    link.href = data.download_url;
+                    link.download = 'analysis_report.csv';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    downloadBtn.innerHTML = '<i class="fas fa-check-circle"></i> 下载完成';
+                    setTimeout(function() {
+                        downloadBtn.innerHTML = '<i class="fas fa-download"></i> 下载报告';
+                        downloadBtn.disabled = false;
+                    }, 2000);
+                } else {
+                    throw new Error(data.error || '生成报告失败');
+                }
+            })
+            .catch(function(error) {
+                console.error('Download report error:', error);
+                downloadBtn.innerHTML = '<i class="fas fa-download"></i> 下载报告';
+                downloadBtn.disabled = false;
+                alert('下载报告失败: ' + error.message);
+            });
+        });
     }
 
     initCharts() {

@@ -7,9 +7,20 @@ class PageManager {
     }
 
     init() {
+        console.log('PageManager.init() called');
         this.bindAllEvents();
         this.initMockData();
         this.initCharts();
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('DOM fully loaded, calling initDashboard');
+                this.initDashboard();
+            });
+        } else {
+            console.log('DOM already loaded, calling initDashboard immediately');
+            this.initDashboard();
+        }
     }
 
     bindAllEvents() {
@@ -105,6 +116,9 @@ class PageManager {
             case 'generate-report':
                 this.loadPage('history');
                 break;
+            case 'ai-assistant':
+                window.open('/ai', '_blank');
+                break;
         }
     }
 
@@ -184,6 +198,58 @@ class PageManager {
     initDashboard() {
         this.initCharts();
         this.initMockData();
+        this.setupDashboardButtons();
+    }
+
+    setupDashboardButtons() {
+        var self = this;
+        
+        console.log('setupDashboardButtons called');
+        
+        var refreshBtn = document.getElementById('refreshDataBtn');
+        console.log('refreshBtn found:', !!refreshBtn);
+        if (refreshBtn) {
+            console.log('Adding click event to refreshBtn');
+            refreshBtn.addEventListener('click', function() {
+                console.log('Refresh button clicked');
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = '<i class="fas fa-spinner" style="animation: spin 1s linear infinite;"></i> 刷新中...';
+                
+                setTimeout(function() {
+                    self.initMockData();
+                    self.initCharts();
+                    refreshBtn.innerHTML = '<i class="fas fa-refresh"></i> 刷新数据';
+                    refreshBtn.disabled = false;
+                    self.showToast('数据已刷新', 'success');
+                }, 1500);
+            });
+        }
+        
+        var exportBtn = document.getElementById('exportReportBtn');
+        console.log('exportBtn found:', !!exportBtn);
+        if (exportBtn) {
+            console.log('Adding click event to exportBtn');
+            exportBtn.addEventListener('click', function() {
+                console.log('Export button clicked');
+                exportBtn.disabled = true;
+                exportBtn.innerHTML = '<i class="fas fa-spinner" style="animation: spin 1s linear infinite;"></i> 生成中...';
+                
+                setTimeout(function() {
+                    var reportContent = generateDashboardReport();
+                    var blob = new Blob([reportContent], { type: 'text/csv;charset=utf-8;' });
+                    var link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'dashboard_report_' + new Date().toISOString().split('T')[0] + '.csv';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    exportBtn.innerHTML = '<i class="fas fa-download"></i> 导出报告';
+                    exportBtn.disabled = false;
+                    self.showToast('报告已导出', 'success');
+                }, 1000);
+            });
+        }
     }
 
     initAnalysis() {
@@ -200,6 +266,77 @@ class PageManager {
     initHistory() {
         this.loadHistoryData();
         this.setupSearchFilter();
+        this.setupHistoryButtons();
+    }
+
+    setupHistoryButtons() {
+        var self = this;
+        
+        var filterBtn = document.getElementById('filterBtn');
+        if (filterBtn) {
+            filterBtn.addEventListener('click', function() {
+                var filterBar = document.querySelector('.filter-bar');
+                if (filterBar) {
+                    filterBar.classList.toggle('show');
+                }
+            });
+        }
+        
+        var exportBtn = document.getElementById('exportHistoryBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', function() {
+                exportBtn.disabled = true;
+                exportBtn.innerHTML = '<i class="fas fa-spinner" style="animation: spin 1s linear infinite;"></i> 导出中...';
+                
+                setTimeout(function() {
+                    var reportContent = generateHistoryReport();
+                    var blob = new Blob([reportContent], { type: 'text/csv;charset=utf-8;' });
+                    var link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'history_report_' + new Date().toISOString().split('T')[0] + '.csv';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    exportBtn.innerHTML = '<i class="fas fa-download"></i> 导出';
+                    exportBtn.disabled = false;
+                    self.showToast('历史记录已导出', 'success');
+                }, 1000);
+            });
+        }
+        
+        document.querySelectorAll('.view-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                self.loadPage('result');
+            });
+        });
+        
+        document.querySelectorAll('.download-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                self.showToast('下载功能开发中', 'info');
+            });
+        });
+        
+        document.querySelectorAll('.delete-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                if (confirm('确定要删除这条记录吗？')) {
+                    btn.parentElement.parentElement.remove();
+                    self.showToast('记录已删除', 'success');
+                }
+            });
+        });
+        
+        document.querySelectorAll('.pagination-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                if (!btn.disabled) {
+                    document.querySelectorAll('.pagination-btn').forEach(function(b) {
+                        b.classList.remove('active');
+                    });
+                    btn.classList.add('active');
+                    self.showToast('已切换到第 ' + btn.textContent + ' 页', 'info');
+                }
+            });
+        });
     }
 
     initCrops() {
@@ -785,6 +922,57 @@ class PageManager {
             toast.remove();
         }, 4000);
     }
+}
+
+function generateDashboardReport() {
+    var report = [];
+    report.push('指标名称,数值,单位');
+    
+    var statTotal = document.getElementById('statTotal');
+    if (statTotal) report.push('今日检测总数,' + statTotal.textContent + ',次');
+    
+    var statMature = document.getElementById('statMature');
+    if (statMature) report.push('成熟作物数,' + statMature.textContent + ',株');
+    
+    var statYoung = document.getElementById('statYoung');
+    if (statYoung) report.push('幼嫩作物数,' + statYoung.textContent + ',株');
+    
+    var statRate = document.getElementById('statRate');
+    if (statRate) report.push('成熟率,' + statRate.textContent + ',');
+    
+    report.push('');
+    report.push('生成时间,' + new Date().toLocaleString('zh-CN') + ',');
+    
+    return report.join('\n');
+}
+
+function generateHistoryReport() {
+    var report = [];
+    report.push('检测ID,检测时间,作物类型,成熟度,置信度,品质评分');
+    
+    var rows = document.querySelectorAll('.history-item');
+    rows.forEach(function(row, idx) {
+        var id = 'REC-' + String(idx + 1).padStart(4, '0');
+        var time = row.querySelector('.history-time');
+        var crop = row.querySelector('.history-crop');
+        var maturity = row.querySelector('.history-maturity');
+        var confidence = row.querySelector('.history-confidence');
+        var quality = row.querySelector('.history-quality');
+        
+        var timeText = time ? time.textContent : '';
+        var cropText = crop ? crop.textContent : '';
+        var maturityText = maturity ? maturity.textContent : '';
+        var confidenceText = confidence ? confidence.textContent : '';
+        var qualityText = quality ? quality.textContent : '';
+        
+        report.push([id, timeText, cropText, maturityText, confidenceText, qualityText].join(','));
+    });
+    
+    report.push('');
+    report.push('生成时间,' + new Date().toLocaleString('zh-CN'));
+    report.push('记录总数,' + rows.length + ',条');
+    
+    return report.join('\n');
 }
 
 document.addEventListener('DOMContentLoaded', function() {

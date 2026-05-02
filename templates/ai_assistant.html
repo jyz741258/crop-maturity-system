@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI助手 - 作物成熟度检测系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 600px;
+            height: 700px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .chat-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 75%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.bot .message-content .bot-avatar {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            float: left;
+            margin-right: 10px;
+            margin-top: 2px;
+        }
+
+        .message.bot .message-content .bot-avatar i {
+            color: white;
+            font-size: 16px;
+        }
+
+        .message.bot .message-content .bot-text {
+            overflow: hidden;
+        }
+
+        .chat-input {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 30px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .chat-input input:focus {
+            border-color: #11998e;
+        }
+
+        .chat-input button {
+            padding: 14px 25px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .chat-input button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(17, 153, 142, 0.4);
+        }
+
+        .chat-input button:active {
+            transform: translateY(0);
+        }
+
+        .quick-questions {
+            padding: 15px 20px;
+            background: #f0f8ff;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .quick-questions p {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .quick-questions .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .quick-questions .tag {
+            padding: 6px 14px;
+            background: white;
+            border: 1px solid #11998e;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #11998e;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-questions .tag:hover {
+            background: #11998e;
+            color: white;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            padding: 10px 15px;
+        }
+
+        .typing-indicator .dot {
+            width: 8px;
+            height: 8px;
+            background: #11998e;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator .dot:nth-child(1) { animation-delay: 0s; }
+        .typing-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+
+        @media (max-width: 500px) {
+            .chat-container {
+                height: 90vh;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2><i class="fa fa-robot"></i> AI助手</h2>
+            <p>有什么可以帮助您的？</p>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-content">
+                    <div class="bot-avatar"><i class="fa fa-leaf"></i></div>
+                    <div class="bot-text">
+                        您好！我是作物成熟度检测系统的AI助手。我可以帮助您了解系统功能、使用方法等。请问有什么可以帮助您的？
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-questions">
+            <p>快速提问：</p>
+            <div class="tags">
+                <span class="tag" onclick="sendMessage('程序有什么功能？')">程序功能</span>
+                <span class="tag" onclick="sendMessage('如何上传图片？')">上传图片</span>
+                <span class="tag" onclick="sendMessage('如何下载报告？')">下载报告</span>
+                <span class="tag" onclick="sendMessage('支持哪些作物？')">支持作物</span>
+                <span class="tag" onclick="sendMessage('如何使用批量分析？')">批量分析</span>
+                <span class="tag" onclick="sendMessage('分析结果如何解读？')">结果解读</span>
+            </div>
+        </div>
+
+        <div class="chat-input">
+            <input type="text" id="userInput" placeholder="输入您的问题..." onkeydown="if(event.keyCode==13) sendMessage()">
+            <button onclick="sendMessage()"><i class="fa fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage(predefinedMessage) {
+            var input = document.getElementById('userInput');
+            var message = predefinedMessage || input.value.trim();
+            
+            if (!message) return;
+
+            input.value = '';
+
+            var chatMessages = document.getElementById('chatMessages');
+
+            var userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.innerHTML = '<div class="message-content">' + message + '</div>';
+            chatMessages.appendChild(userMessage);
+
+            var typingIndicator = document.createElement('div');
+            typingIndicator.className = 'message bot';
+            typingIndicator.innerHTML = '<div class="message-content"><div class="typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>';
+            chatMessages.appendChild(typingIndicator);
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            fetch('/api/ai/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ question: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                chatMessages.removeChild(typingIndicator);
+                
+                var botMessage = document.createElement('div');
+                botMessage.className = 'message bot';
+                botMessage.innerHTML = `
+                    <div class="message-content">
+                        <div class="bot-avatar"><i class="fa fa-leaf"></i></div>
+                        <div class="bot-text">${data.answer}</div>
+                    </div>
+                `;
+                chatMessages.appendChild(botMessage);
+                
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            })
+            .catch(error => {
+                chatMessages.removeChild(typingIndicator);
+                
+                var errorMessage = document.createElement('div');
+                errorMessage.className = 'message bot';
+                errorMessage.innerHTML = `
+                    <div class="message-content">
+                        <div class="bot-avatar"><i class="fa fa-leaf"></i></div>
+                        <div class="bot-text">抱歉，我暂时无法回答您的问题，请稍后再试。</div>
+                    </div>
+                `;
+                chatMessages.appendChild(errorMessage);
+                
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        }
+    </script>
+</body>
+</html>

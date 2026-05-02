@@ -50,6 +50,101 @@ class ImageVisualizer:
         
         return result
 
+    def draw_maturity_boxes_with_stats(self, image: np.ndarray, detections: List[Dict[str, Any]]) -> np.ndarray:
+        result = image.copy()
+        height, width = result.shape[:2]
+        
+        plant_count = sum(1 for d in detections if d.get('detection_type') == 'plant')
+        leaf_count = sum(1 for d in detections if d.get('detection_type') == 'leaf')
+        total_leaves_detected = sum(d.get('leaf_count', 1) for d in detections)
+        
+        counts_by_maturity = {}
+        for det in detections:
+            maturity = det.get('maturity', '未知')
+            counts_by_maturity[maturity] = counts_by_maturity.get(maturity, 0) + 1
+        
+        for idx, det in enumerate(detections):
+            x1, y1, x2, y2 = det['bbox']
+            maturity = det.get('maturity', '未知')
+            confidence = det.get('confidence', 0)
+            detection_type = det.get('detection_type', 'leaf')
+            leaf_count_det = det.get('leaf_count', 1)
+            quality_score = det.get('quality_score', 0)
+            
+            color = self.maturity_colors.get(maturity, (255, 255, 255))
+            color_bgr = (color[2], color[1], color[0])
+            
+            box_thickness = max(2, min(4, int((x2 - x1 + y2 - y1) / 100)))
+            cv2.rectangle(result, (x1, y1), (x2, y2), color_bgr, box_thickness)
+            
+            if detection_type == 'plant':
+                cv2.putText(result, '🌱', (x1 - 15, y1 + 15),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, color_bgr, 2)
+            else:
+                cv2.putText(result, '🍃', (x1 - 15, y1 + 15),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, color_bgr, 2)
+            
+            cv2.putText(result, str(idx + 1), (x1 + 5, y1 + 22),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+            
+            labels = []
+            labels.append(f"{self.maturity_icons.get(maturity, '🌿')} {maturity}")
+            labels.append(f"置信度: {confidence:.1f}%")
+            labels.append(f"品质: {quality_score}分")
+            if detection_type == 'plant':
+                labels.append(f"叶片数: {leaf_count_det}")
+            
+            label_y = y2 + 5
+            for label_text in labels:
+                label_size, _ = cv2.getTextSize(label_text, cv2.FONT_HERSHEY_SIMPLEX, 0.45, 1)
+                if label_y + label_size[1] < height - 10:
+                    cv2.putText(result, label_text, (x1, label_y),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.45, color_bgr, 1)
+                    label_y += label_size[1] + 3
+        
+        legend_bg = np.zeros((110, width, 3), dtype=np.uint8)
+        legend_bg[:, :] = (10, 30, 10)
+        legend_alpha = 0.8
+        
+        cv2.putText(legend_bg, f"📊 检测统计", (20, 25),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+        
+        stats_text = [
+            f"🌱 整株作物: {plant_count} 棵",
+            f"🍃 单叶检测: {leaf_count} 片",
+            f"📝 总计叶片: {total_leaves_detected} 片",
+            f"🔢 检测目标: {len(detections)} 个"
+        ]
+        
+        y_pos = 50
+        for text in stats_text:
+            cv2.putText(legend_bg, text, (20, y_pos),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.55, (200, 255, 200), 1)
+            y_pos += 20
+        
+        legend_start_x = width - 200
+        legend_start_y = 10
+        
+        for i in range(legend_bg.shape[0]):
+            for j in range(legend_bg.shape[1]):
+                if legend_start_y + i < result.shape[0] and legend_start_x + j < result.shape[1]:
+                    alpha = legend_alpha
+                    result[legend_start_y + i, legend_start_x + j] = (
+                        (1 - alpha) * result[legend_start_y + i, legend_start_x + j] +
+                        alpha * legend_bg[i, j]
+                    ).astype(np.uint8)
+        
+        cv2.putText(result, f"📊 检测统计", (legend_start_x + 15, legend_start_y + 25),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+        
+        y_pos = legend_start_y + 48
+        for text in stats_text:
+            cv2.putText(result, text, (legend_start_x + 15, y_pos),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 255, 200), 1)
+            y_pos += 18
+        
+        return result
+
     def draw_count_label(self, image: np.ndarray, total_count: int, counts_by_maturity: Dict[str, int]) -> np.ndarray:
         result = image.copy()
         height, width = result.shape[:2]

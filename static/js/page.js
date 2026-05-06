@@ -119,6 +119,9 @@ class PageManager {
             case 'ai-assistant':
                 window.open('/ai', '_blank');
                 break;
+            case 'region-analysis':
+                window.open('/region', '_blank');
+                break;
         }
     }
 

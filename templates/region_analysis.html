@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>区域级分析 - 作物成熟度检测系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .upload-area i {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .upload-area p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .upload-area small {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .image-preview.show {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group select:focus, .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .image-container {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .result-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .legend {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+            font-size: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .maturity-bars {
+            margin-top: 20px;
+        }
+
+        .maturity-bar-item {
+            margin-bottom: 15px;
+        }
+
+        .maturity-bar-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .maturity-bar {
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .maturity-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .maturity-bar-fill.young {
+            background: linear-gradient(90deg, #f39c12, #f1c40f);
+        }
+
+        .maturity-bar-fill.mature {
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+        }
+
+        .maturity-bar-fill.overripe {
+            background: linear-gradient(90deg, #e67e22, #f39c12);
+        }
+
+        .maturity-bar-fill.senile {
+            background: linear-gradient(90deg, #95a5a6, #bdc3c7);
+        }
+
+        .region-info {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .region-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .region-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .region-coords {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .region-stats {
+            font-size: 12px;
+            color: #333;
+        }
+
+        .download-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .download-links a {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .download-links a:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 15px;
+            color: #667eea;
+            font-size: 14px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa fa-map-pin"></i> 区域级分析</h1>
+            <button class="back-btn" onclick="goBack()">
+                <i class="fa fa-arrow-left"></i> 返回系统
+            </button>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fa fa-upload"></i> 上传图片
+                </div>
+                
+                <div class="upload-area" id="uploadArea">
+                    <i class="fa fa-image"></i>
+                    <p>点击或拖拽图片到此处</p>
+                    <small>支持 JPG、PNG、BMP 格式</small>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                </div>
+                
+                <img id="previewImage" class="image-preview" alt="预览图片">
+                
+                <div class="form-group">
+                    <label for="cropType">作物类型</label>
+                    <select id="cropType">
+                        <option value="Pepper__bell">甜椒</option>
+                        <option value="Potato">土豆</option>
+                        <option value="Tomato">番茄</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="gridSize">网格大小 (像素)</label>
+                    <input type="number" id="gridSize" value="50" min="20" max="100">
+                </div>
+                
+                <button class="btn" id="analyzeBtn" disabled>
+                    <i class="fa fa-search"></i> 开始区域分析
+                </button>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fa fa-chart-map"></i> 分析结果
+                </div>
+                
+                <div class="image-container" id="resultContainer">
+                    <img id="resultImage" class="result-image" alt="分析结果">
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #f39c12;"></div>
+                            <span>幼嫩期</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #27ae60;"></div>
+                            <span>成熟期</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #e67e22;"></div>
+                            <span>过熟期</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #95a5a6;"></div>
+                            <span>衰老期</span>
+                        </div>
+                    </div>
+                    <div class="loading-overlay" id="loadingOverlay">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">正在分析区域...</div>
+                    </div>
+                </div>
+                
+                <div class="download-links" id="downloadLinks" style="display: none;">
+                    <a href="#" id="heatmapDownload" download>
+                        <i class="fa fa-download"></i> 下载热力图
+                    </a>
+                    <a href="#" id="labeledDownload" download>
+                        <i class="fa fa-download"></i> 下载标注图
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content" style="margin-top: 20px;">
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fa fa-bar-chart"></i> 统计数据
+                </div>
+                
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalCount">0</div>
+                        <div class="stat-label">检测目标总数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="regionCount">0</div>
+                        <div class="stat-label">分析区域数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgConfidence">0%</div>
+                        <div class="stat-label">平均置信度</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgGreenRatio">0%</div>
+                        <div class="stat-label">平均绿色占比</div>
+                    </div>
+                </div>
+                
+                <div class="maturity-bars" id="maturityBars">
+                    <div class="maturity-bar-item">
+                        <div class="maturity-bar-label">
+                            <span>幼嫩期</span>
+                            <span id="youngCount">0</span>
+                        </div>
+                        <div class="maturity-bar">
+                            <div class="maturity-bar-fill young" id="youngBar"></div>
+                        </div>
+                    </div>
+                    <div class="maturity-bar-item">
+                        <div class="maturity-bar-label">
+                            <span>成熟期</span>
+                            <span id="matureCount">0</span>
+                        </div>
+                        <div class="maturity-bar">
+                            <div class="maturity-bar-fill mature" id="matureBar"></div>
+                        </div>
+                    </div>
+                    <div class="maturity-bar-item">
+                        <div class="maturity-bar-label">
+                            <span>过熟期</span>
+                            <span id="overripeCount">0</span>
+                        </div>
+                        <div class="maturity-bar">
+                            <div class="maturity-bar-fill overripe" id="overripeBar"></div>
+                        </div>
+                    </div>
+                    <div class="maturity-bar-item">
+                        <div class="maturity-bar-label">
+                            <span>衰老期</span>
+                            <span id="senileCount">0</span>
+                        </div>
+                        <div class="maturity-bar">
+                            <div class="maturity-bar-fill senile" id="senileBar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fa fa-th-large"></i> 区域详情
+                </div>
+                
+                <div class="region-info" id="regionInfo">
+                    <p style="text-align: center; color: #999;">请上传图片并分析以查看区域详情</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.location.href = '/dashboard';
+        }
+
+        const uploadArea = document.getElementById('uploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const previewImage = document.getElementById('previewImage');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resultImage = document.getElementById('resultImage');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const downloadLinks = document.getElementById('downloadLinks');
+
+        uploadArea.addEventListener('click', () => {
+            imageInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewImage.classList.add('show');
+                analyzeBtn.disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        analyzeBtn.addEventListener('click', () => {
+            const file = imageInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('crop_type', document.getElementById('cropType').value);
+            formData.append('grid_size', document.getElementById('gridSize').value);
+
+            loadingOverlay.classList.add('show');
+            
+            fetch('/api/analyze_region', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingOverlay.classList.remove('show');
+                
+                if (data.success) {
+                    resultImage.src = data.labeled_download_url + '?' + Date.now();
+                    resultImage.style.display = 'block';
+                    downloadLinks.style.display = 'flex';
+                    document.getElementById('heatmapDownload').href = data.heatmap_download_url;
+                    document.getElementById('labeledDownload').href = data.labeled_download_url;
+                    
+                    updateStats(data);
+                    updateRegionInfo(data.regions);
+                } else {
+                    alert('分析失败: ' + data.error);
+                }
+            })
+            .catch(error => {
+                loadingOverlay.classList.remove('show');
+                alert('分析失败: ' + error.message);
+            });
+        });
+
+        function updateStats(data) {
+            document.getElementById('totalCount').textContent = data.total_count || 0;
+            document.getElementById('regionCount').textContent = (data.regions || []).length;
+            document.getElementById('avgConfidence').textContent = (data.average_confidence || 0) + '%';
+            document.getElementById('avgGreenRatio').textContent = ((data.average_green_ratio || 0) * 100).toFixed(1) + '%';
+
+            const counts = data.counts_by_maturity || {};
+            const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
+
+            document.getElementById('youngCount').textContent = counts['幼嫩期'] || 0;
+            document.getElementById('matureCount').textContent = counts['成熟期'] || 0;
+            document.getElementById('overripeCount').textContent = counts['过熟期'] || 0;
+            document.getElementById('senileCount').textContent = counts['衰老期'] || 0;
+
+            document.getElementById('youngBar').style.width = ((counts['幼嫩期'] || 0) / total * 100) + '%';
+            document.getElementById('matureBar').style.width = ((counts['成熟期'] || 0) / total * 100) + '%';
+            document.getElementById('overripeBar').style.width = ((counts['过熟期'] || 0) / total * 100) + '%';
+            document.getElementById('senileBar').style.width = ((counts['衰老期'] || 0) / total * 100) + '%';
+        }
+
+        function updateRegionInfo(regions) {
+            const container = document.getElementById('regionInfo');
+            
+            if (!regions || regions.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">没有检测到区域</p>';
+                return;
+            }
+
+            container.innerHTML = regions.map((region, index) => `
+                <div class="region-item">
+                    <div class="region-item-header">
+                        <span style="font-weight: 600; color: #667eea;">区域 ${index + 1}</span>
+                        <span class="region-coords">(${region.grid_x}, ${region.grid_y})</span>
+                    </div>
+                    <div class="region-stats">
+                        <span style="margin-right: 15px;">检测数量: ${region.detection_count}</span>
+                        <span>优势成熟度: <strong>${region.dominant_maturity}</strong></span>
+                    </div>
+                    ${Object.entries(region.counts_by_maturity).map(([maturity, count]) => `
+                        <div style="font-size: 11px; color: #666; margin-top: 5px;">
+                            - ${maturity}: ${count} 株
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

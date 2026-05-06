@@ -48,19 +48,64 @@
 
         .chat-header {
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            padding: 20px;
-            text-align: center;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             color: white;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-3px);
+        }
+
+        .header-title {
+            text-align: center;
+            flex: 1;
+            margin-right: 80px;
         }
 
         .chat-header h2 {
             font-size: 1.5rem;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .chat-header p {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             opacity: 0.9;
+        }
+
+        .jump-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            margin: 2px 4px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .jump-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.4);
         }
 
         .chat-messages {
@@ -247,8 +292,13 @@
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            <h2><i class="fa fa-robot"></i> AI助手</h2>
-            <p>有什么可以帮助您的？</p>
+            <button class="back-btn" onclick="goBack()">
+                <i class="fa fa-arrow-left"></i> 返回系统
+            </button>
+            <div class="header-title">
+                <h2><i class="fa fa-robot"></i> AI助手</h2>
+                <p>有什么可以帮助您的？</p>
+            </div>
         </div>
 
         <div class="chat-messages" id="chatMessages">
@@ -287,6 +337,44 @@
     </div>
 
     <script>
+        function goBack() {
+            window.location.href = '/dashboard';
+        }
+
+        function parseAnswer(answer) {
+            var pageMap = {
+                '分析页面': '/analysis',
+                '批量分析': '/batch',
+                '仪表盘': '/dashboard',
+                '历史记录': '/history',
+                '作物库': '/crops',
+                '帮助页面': '/help',
+                'AI助手': '/ai'
+            };
+
+            var parsed = answer;
+
+            parsed = parsed.replace(/\[跳转:([^\]]+)\]([^\[]+)\[\/跳转\]/g, function(match, pageName, linkText) {
+                var url = pageMap[pageName.trim()];
+                if (url) {
+                    return '<a href="' + url + '" class="jump-link" target="_top">' + linkText.trim() + '</a>';
+                }
+                return match;
+            });
+
+            parsed = parsed.replace(/\[跳转:([^\]]+)\]/g, function(match, pageName) {
+                var url = pageMap[pageName.trim()];
+                if (url) {
+                    return '<a href="' + url + '" class="jump-link" target="_top">' + pageName + '</a>';
+                }
+                return match;
+            });
+
+            parsed = parsed.replace(/\n/g, '<br>');
+
+            return parsed;
+        }
+
         function sendMessage(predefinedMessage) {
             var input = document.getElementById('userInput');
             var message = predefinedMessage || input.value.trim();
@@ -322,10 +410,11 @@
                 
                 var botMessage = document.createElement('div');
                 botMessage.className = 'message bot';
+                var parsedAnswer = parseAnswer(data.answer);
                 botMessage.innerHTML = `
                     <div class="message-content">
                         <div class="bot-avatar"><i class="fa fa-leaf"></i></div>
-                        <div class="bot-text">${data.answer}</div>
+                        <div class="bot-text">${parsedAnswer}</div>
                     </div>
                 `;
                 chatMessages.appendChild(botMessage);

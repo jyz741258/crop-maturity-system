@@ -292,7 +292,7 @@ class PageManager {
                 exportBtn.innerHTML = '<i class="fas fa-spinner" style="animation: spin 1s linear infinite;"></i> 导出中...';
                 
                 setTimeout(function() {
-                    var reportContent = generateHistoryReport();
+                    var reportContent = self.generateHistoryReport();
                     var blob = new Blob([reportContent], { type: 'text/csv;charset=utf-8;' });
                     var link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
@@ -308,38 +308,78 @@ class PageManager {
             });
         }
         
-        document.querySelectorAll('.view-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                self.loadPage('result');
-            });
-        });
-        
-        document.querySelectorAll('.download-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                self.showToast('下载功能开发中', 'info');
-            });
-        });
-        
-        document.querySelectorAll('.delete-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                if (confirm('确定要删除这条记录吗？')) {
-                    btn.parentElement.parentElement.remove();
-                    self.showToast('记录已删除', 'success');
-                }
-            });
-        });
-        
         document.querySelectorAll('.pagination-btn').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                if (!btn.disabled) {
-                    document.querySelectorAll('.pagination-btn').forEach(function(b) {
-                        b.classList.remove('active');
-                    });
-                    btn.classList.add('active');
-                    self.showToast('已切换到第 ' + btn.textContent + ' 页', 'info');
+                if (btn.disabled) return;
+                
+                var pageNum = btn.textContent;
+                var totalPages = 16;
+                
+                if (btn.querySelector('i')) {
+                    var currentPage = document.querySelector('.pagination-btn.active');
+                    if (currentPage) {
+                        var currentNum = parseInt(currentPage.textContent);
+                        if (btn.querySelector('.fa-chevron-left')) {
+                            pageNum = Math.max(1, currentNum - 1).toString();
+                        } else {
+                            pageNum = Math.min(totalPages, currentNum + 1).toString();
+                        }
+                    }
+                }
+                
+                var pageNumInt = parseInt(pageNum);
+                if (isNaN(pageNumInt)) return;
+                
+                document.querySelectorAll('.pagination-btn').forEach(function(b) {
+                    b.classList.remove('active');
+                    b.disabled = false;
+                });
+                
+                var firstBtn = document.querySelector('.pagination-btn:first-child');
+                var lastBtn = document.querySelector('.pagination-btn:last-child');
+                
+                if (pageNumInt <= 1) {
+                    if (firstBtn) firstBtn.disabled = true;
+                }
+                if (pageNumInt >= totalPages) {
+                    if (lastBtn) lastBtn.disabled = true;
+                }
+                
+                var targetBtn = Array.from(document.querySelectorAll('.pagination-btn')).find(function(b) {
+                    return b.textContent === pageNum;
+                });
+                
+                if (targetBtn) {
+                    targetBtn.classList.add('active');
+                    self.showToast('已切换到第 ' + pageNum + ' 页', 'info');
                 }
             });
         });
+    }
+
+    generateHistoryReport() {
+        var report = [];
+        report.push('检测ID,文件名,作物类型,检测时间,成熟率,状态');
+        
+        var rows = document.querySelectorAll('#historyTableBody tr');
+        rows.forEach(function(row) {
+            var cells = row.querySelectorAll('td');
+            if (cells.length >= 6) {
+                var id = cells[0].textContent.trim();
+                var filename = cells[1].textContent.trim();
+                var crop = cells[2].textContent.trim();
+                var time = cells[3].textContent.trim();
+                var rate = cells[4].textContent.trim();
+                var status = cells[5].textContent.trim();
+                report.push([id, filename, crop, time, rate, status].join(','));
+            }
+        });
+        
+        report.push('');
+        report.push('生成时间,' + new Date().toLocaleString('zh-CN'));
+        report.push('记录总数,' + rows.length + ',条');
+        
+        return report.join('\n');
     }
 
     initCrops() {
@@ -792,18 +832,19 @@ class PageManager {
     }
 
     loadHistoryData() {
-        var historyTable = document.getElementById('historyTable');
-        if (!historyTable) return;
+        var historyTableBody = document.getElementById('historyTableBody');
+        if (!historyTableBody) return;
 
         var mockHistory = [
-            { id: 'REC-001', name: '大田地块A.jpg', crop: '生菜', date: '2024-01-15 14:30', matureRate: 75 },
-            { id: 'REC-002', name: '茶园航拍.mp4', crop: '茶叶', date: '2024-01-14 10:15', matureRate: 82 },
-            { id: 'REC-003', name: '菠菜种植区.jpg', crop: '菠菜', date: '2024-01-13 16:45', matureRate: 68 },
-            { id: 'REC-004', name: '芹菜基地.jpg', crop: '芹菜', date: '2024-01-12 09:20', matureRate: 90 },
-            { id: 'REC-005', name: '烟叶田块B.jpg', crop: '烟叶', date: '2024-01-11 11:30', matureRate: 73 }
+            { id: 'REC-2024-001', name: '甜椒种植区.jpg', crop: '甜椒', date: '2024-01-15 14:30:25', matureRate: 85 },
+            { id: 'REC-2024-002', name: '土豆田航拍.jpg', crop: '土豆', date: '2024-01-14 10:15:42', matureRate: 78 },
+            { id: 'REC-2024-003', name: '番茄大棚检测.jpg', crop: '番茄', date: '2024-01-13 16:45:18', matureRate: 92 },
+            { id: 'REC-2024-004', name: '甜椒地块B.jpg', crop: '甜椒', date: '2024-01-12 09:20:33', matureRate: 88 },
+            { id: 'REC-2024-005', name: '土豆样本集.jpg', crop: '土豆', date: '2024-01-11 11:30:55', matureRate: 72 }
         ];
 
-        historyTable.innerHTML = mockHistory.map(function(item, idx) {
+        var self = this;
+        historyTableBody.innerHTML = mockHistory.map(function(item, idx) {
             var rateClass = item.matureRate >= 80 ? 'high' : (item.matureRate >= 60 ? 'medium' : 'low');
             return '<tr style="animation: fade-in 0.3s ease-out ' + (idx * 0.05) + 's forwards; opacity: 0;">' +
                 '<td>' + item.id + '</td>' +
@@ -811,22 +852,63 @@ class PageManager {
                 '<td>' + item.crop + '</td>' +
                 '<td>' + item.date + '</td>' +
                 '<td><span class="rate-badge ' + rateClass + '">' + item.matureRate + '%</span></td>' +
+                '<td><span class="status-badge completed">已完成</span></td>' +
                 '<td>' +
                 '<button class="action-btn view-btn" onclick="pageManager.loadPage(\'result\')"><i class="fas fa-eye"></i></button>' +
-                '<button class="action-btn download-btn"><i class="fas fa-download"></i></button>' +
-                '<button class="action-btn delete-btn"><i class="fas fa-trash"></i></button>' +
+                '<button class="action-btn download-btn" onclick="pageManager.downloadRecord(this)"><i class="fas fa-download"></i></button>' +
+                '<button class="action-btn delete-btn" onclick="pageManager.deleteRecord(this)"><i class="fas fa-trash"></i></button>' +
                 '</td>' +
                 '</tr>';
         }).join('');
     }
 
+    downloadRecord(btn) {
+        var row = btn.closest('tr');
+        var cells = row.querySelectorAll('td');
+        var recordData = {
+            id: cells[0].textContent,
+            filename: cells[1].textContent,
+            crop_type: cells[2].textContent,
+            detect_time: cells[3].textContent,
+            maturity_rate: cells[4].textContent
+        };
+
+        var csvContent = '记录ID,文件名,作物类型,检测时间,成熟率\n' +
+            recordData.id + ',' +
+            recordData.filename + ',' +
+            recordData.crop_type + ',' +
+            recordData.detect_time + ',' +
+            recordData.maturity_rate;
+
+        var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = recordData.id + '.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        this.showToast('记录已下载', 'success');
+    }
+
+    deleteRecord(btn) {
+        if (confirm('确定要删除这条记录吗？')) {
+            var row = btn.closest('tr');
+            row.style.animation = 'fade-out 0.3s ease-out forwards';
+            setTimeout(function() {
+                row.remove();
+            }, 300);
+            this.showToast('记录已删除', 'success');
+        }
+    }
+
     setupSearchFilter() {
-        var searchInput = document.querySelector('.search-box input');
+        var searchInput = document.querySelector('.search-box-container input');
         if (!searchInput) return;
 
         searchInput.addEventListener('input', function(e) {
             var query = e.target.value.toLowerCase();
-            var tableRows = document.querySelectorAll('#historyTable tr');
+            var tableRows = document.querySelectorAll('#historyTableBody tr');
             tableRows.forEach(function(row) {
                 var text = row.textContent.toLowerCase();
                 row.style.display = text.includes(query) ? '' : 'none';

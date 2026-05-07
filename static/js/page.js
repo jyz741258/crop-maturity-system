@@ -921,12 +921,10 @@ class PageManager {
         if (!cropGrid) return;
 
         var crops = [
-            { id: 'tea', name: '茶叶', icon: '🍵', desc: '适制高档绿茶、名优茶', standards: 'GB/T 23776-2018' },
-            { id: 'tobacco', name: '烟叶', icon: '🚬', desc: '最佳采收期，品质最优', standards: 'GB 2635-2018' },
-            { id: 'mulberry', name: '桑叶', icon: '🐛', desc: '适用于大蚕饲养', standards: 'NY/T 1187-2006' },
-            { id: 'lettuce', name: '生菜', icon: '🥬', desc: '商品价值最高', standards: 'GB/T 18407.1-2001' },
-            { id: 'spinach', name: '菠菜', icon: '🌿', desc: '营养丰富', standards: 'NY/T 5008-2016' },
-            { id: 'celery', name: '芹菜', icon: '🥕', desc: '叶柄粗壮，口感脆嫩', standards: 'NY/T 5008-2016' }
+            { id: 'Pepper__bell', name: '甜椒', icon: '🫑', desc: '果实成熟时呈绿色或红色，富含维生素C', standards: 'GB/T 19630-2005' },
+            { id: 'Potato', name: '土豆', icon: '🥔', desc: '块茎作物，叶片繁茂期为最佳检测时机', standards: 'GB/T 8321-2012' },
+            { id: 'Tomato', name: '番茄', icon: '🍅', desc: '果实成熟时颜色从绿转红，叶片健康直接影响产量', standards: 'GB/T 19175-2003' },
+            { id: 'Lychee', name: '荔枝', icon: '🍒', desc: '常绿果树，叶片状态反映树体营养状况', standards: 'GB/T 18470-2001' }
         ];
 
         cropGrid.innerHTML = crops.map(function(crop, idx) {

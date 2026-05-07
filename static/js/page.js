@@ -561,9 +561,9 @@ class PageManager {
         if (!recentList) return;
 
         var mockRecent = [
-            { id: 1, name: '大田地块A.jpg', crop: '生菜', date: '10分钟前', matureRate: 75 },
-            { id: 2, name: '茶园航拍.mp4', crop: '茶叶', date: '30分钟前', matureRate: 82 },
-            { id: 3, name: '菠菜种植区.jpg', crop: '菠菜', date: '1小时前', matureRate: 68 }
+            { id: 1, name: '甜椒种植区.jpg', crop: '甜椒', date: '10分钟前', matureRate: 85 },
+            { id: 2, name: '土豆田航拍.jpg', crop: '土豆', date: '30分钟前', matureRate: 78 },
+            { id: 3, name: '番茄大棚检测.jpg', crop: '番茄', date: '1小时前', matureRate: 92 }
         ];
 
         var self = this;
@@ -589,7 +589,7 @@ class PageManager {
 
     loadStatsSummary() {
         var statValues = document.querySelectorAll('.stats-overview .stat-value');
-        var values = [24, 856, 78, 3];
+        var values = [3221, 2456, 86.5, 2];
 
         for (var i = 0; i < statValues.length; i++) {
             this.animateNumber(statValues[i], 0, values[i], 1500);

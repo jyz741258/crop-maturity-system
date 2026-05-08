@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> ?- </title>
+    <title>作物成熟度分析系统 - 单图分析</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/style.css"><link rel="stylesheet" href="/static/css/responsive.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
     <link rel="stylesheet" href="/static/css/animations.css">
 </head>
 <body>
@@ -17,89 +18,78 @@
         
         <main class="main-content" id="mainContent">
             <div class="page-header animate-fade-in">
-                <h1></h1>
-                <p>?/p>
+                <h1>单图分析</h1>
+                <p>上传单张图片进行作物成熟度检测</p>
             </div>
 
             <div class="analysis-container">
                 <div class="upload-section animate-fade-in" style="animation-delay: 0.1s">
                     <div class="section-header">
-                        <h2><i class="fas fa-upload"></i> </h2>
+                        <h2><i class="fas fa-upload"></i> 上传图片</h2>
                     </div>
                     
                     <div class="upload-area" id="uploadArea">
                         <div class="upload-icon">
                             <i class="fas fa-cloud-upload-alt"></i>
                         </div>
-                        <p></p>
-                        <p class="upload-hint"> JPGPNGBMP ?50MB</p>
+                        <p>点击或拖拽上传图片</p>
+                        <p class="upload-hint">支持 JPG、PNG、BMP 格式，最大50MB</p>
                         <input type="file" id="fileInput" accept="image/*" style="display: none">
                     </div>
                     
                     <div class="preview-section" id="previewSection">
                         <div class="preview-placeholder">
                             <i class="fas fa-image"></i>
-                            <p></p>
+                            <p>图片预览区域</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="settings-section animate-fade-in" style="animation-delay: 0.2s">
                     <div class="section-header">
-                        <h2><i class="fas fa-cog"></i> </h2>
+                        <h2><i class="fas fa-cog"></i> 检测设置</h2>
                     </div>
                     
                     <div class="settings-card">
                         <div class="setting-item">
-                            <label></label>
+                            <label>作物类型</label>
                             <div class="crop-selector" id="cropSelector">
-                                <div class="crop-chip active" data-crop="甜椒__bell">
-                                    <span></span>
-                                    <span></span>
+                                <div class="crop-chip active" data-crop="Pepper__bell">
+                                    <span>🫑</span>
+                                    <span>甜椒</span>
                                 </div>
-                                <div class="crop-chip" data-crop="土豆">
-                                    <span></span>
-                                    <span></span>
+                                <div class="crop-chip" data-crop="Potato">
+                                    <span>🥔</span>
+                                    <span>土豆</span>
                                 </div>
-                                <div class="crop-chip" data-crop="番茄">
-                                    <span></span>
-                                    <span></span>
+                                <div class="crop-chip" data-crop="Tomato">
+                                    <span>🍅</span>
+                                    <span>番茄</span>
                                 </div>
-                                <div class="crop-chip" data-crop="荔枝">
-                                    <span></span>
-                                    <span></span>
+                                <div class="crop-chip" data-crop="Lychee">
+                                    <span>🍒</span>
+                                    <span>荔枝</span>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="setting-item">
                             <div class="setting-label">
-                                <label></label>
-                                <span class="setting-value">50%</span>
+                                <span>检测精度</span>
+                                <span class="setting-value">高</span>
                             </div>
-                            <input type="range" id="sensitivitySlider" min="10" max="100" value="50">
+                            <input type="range" id="precisionSlider" min="1" max="100" value="85">
                             <div class="slider-labels">
-                                <span>?/span>
-                                <span>?/span>
-                            </div>
-                        </div>
-                        
-                        <div class="setting-item">
-                            <div class="setting-label">
-                                <label>?/label>
-                                <span class="setting-value">0.5</span>
-                            </div>
-                            <input type="range" id="confidenceSlider" min="0" max="1" step="0.05" value="0.5">
-                            <div class="slider-labels">
-                                <span>0.0</span>
-                                <span>1.0</span>
+                                <span>低</span>
+                                <span>中</span>
+                                <span>高</span>
                             </div>
                         </div>
                         
                         <div class="setting-item">
                             <label class="checkbox-label">
-                                <input type="checkbox" id="showConfidence" checked>
-                                <span>?/span>
+                                <input type="checkbox" id="enableEnhance">
+                                <span>启用图像增强</span>
                             </label>
                         </div>
                     </div>
@@ -107,85 +97,11 @@
 
                 <div class="action-section animate-fade-in" style="animation-delay: 0.3s">
                     <button class="btn btn-primary btn-lg" id="analyzeBtn">
-                        <i class="fas fa-play"></i>
-                        ?
+                        <i class="fas fa-play"></i> 开始分析
                     </button>
-                    <button class="btn btn-outline btn-lg" id="clearBtn">
-                        <i class="fas fa-trash"></i>
-                        
+                    <button class="btn btn-secondary btn-lg" id="resetBtn">
+                        <i class="fas fa-refresh"></i> 重置
                     </button>
-                </div>
-            </div>
-
-            <div class="analysis-result" id="analysisResult" style="display: none;">
-                <div class="page-header animate-fade-in">
-                    <h1></h1>
-                    <p>?/p>
-                </div>
-                
-                <div class="result-content">
-                    <div class="result-images animate-fade-in" style="animation-delay: 0.1s">
-                        <div class="image-card">
-                            <div class="card-header">
-                                <h3></h3>
-                            </div>
-                            <img id="originalImage" src="" alt="" class="result-image">
-                        </div>
-                        <div class="image-card">
-                            <div class="card-header">
-                                <h3>?/h3>
-                            </div>
-                            <img id="markedImage" src="" alt="? class="result-image">
-                        </div>
-                    </div>
-                    
-                    <div class="result-stats animate-fade-in" style="animation-delay: 0.2s">
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-icon primary">
-                                    <i class="fas fa-leaf"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <div class="stat-value" id="resultTotal">0</div>
-                                    <div class="stat-label"></div>
-                                </div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon success">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <div class="stat-value" id="result成熟率">0</div>
-                                    <div class="stat-label">?/div>
-                                </div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon warning">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <div class="stat-value" id="resultRate">0%</div>
-                                    <div class="stat-label">?/div>
-                                </div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon info">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <div class="stat-value" id="resultTime">0s</div>
-                                    <div class="stat-label"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="result-details animate-fade-in" style="animation-delay: 0.3s">
-                        <div class="card-header">
-                            <h3><i class="fas fa-list"></i> ?/h3>
-                        </div>
-                        <div class="detection-list" id="detectionList"></div>
-                    </div>
                 </div>
             </div>
         </main>

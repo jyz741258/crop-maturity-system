@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> ?- </title>
+    <title>作物成熟度分析系统 - 帮助中心</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/style.css"><link rel="stylesheet" href="/static/css/responsive.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
     <link rel="stylesheet" href="/static/css/animations.css">
 </head>
 <body>
@@ -17,185 +18,120 @@
         
         <main class="main-content" id="mainContent">
             <div class="page-header animate-fade-in">
-                <h1></h1>
-                <p>?/p>
+                <h1>帮助中心</h1>
+                <p>获取系统使用帮助和常见问题解答</p>
             </div>
 
             <div class="help-container">
-                <div class="help-sidebar animate-fade-in" style="animation-delay: 0.1s">
-                    <div class="help-item active" data-content="overview">
-                        <i class="fas fa-home"></i>
-                        <span></span>
+                <div class="help-sidebar">
+                    <div class="help-section active" data-section="getting-started">
+                        <i class="fas fa-play-circle"></i>
+                        <span>快速入门</span>
                     </div>
-                    <div class="help-item" data-content="upload">
-                        <i class="fas fa-upload"></i>
-                        <span></span>
-                    </div>
-                    <div class="help-item" data-content="analysis">
+                    <div class="help-section" data-section="analysis">
                         <i class="fas fa-search"></i>
-                        <span></span>
+                        <span>分析功能</span>
                     </div>
-                    <div class="help-item" data-content="results">
-                        <i class="fas fa-chart-bar"></i>
-                        <span></span>
+                    <div class="help-section" data-section="crops">
+                        <i class="fas fa-seedling"></i>
+                        <span>作物管理</span>
                     </div>
-                    <div class="help-item" data-content="batch">
-                        <i class="fas fa-layer-group"></i>
-                        <span></span>
+                    <div class="help-section" data-section="reports">
+                        <i class="fas fa-file-report"></i>
+                        <span>报告导出</span>
                     </div>
-                    <div class="help-item" data-content="faq">
+                    <div class="help-section" data-section="faq">
                         <i class="fas fa-question-circle"></i>
-                        <span></span>
+                        <span>常见问题</span>
                     </div>
                 </div>
 
-                <div class="help-content-container animate-fade-in" style="animation-delay: 0.2s">
-                    <div id="overview" class="help-content active">
-                        <h2><i class="fas fa-home"></i> </h2>
-                        <p>?/p>
-                        
-                        <div class="feature-cards">
-                            <div class="feature-card">
-                                <i class="fas fa-image"></i>
-                                <h3></h3>
-                                <p>?/p>
+                <div class="help-content">
+                    <div class="help-section-content" id="getting-started">
+                        <h2><i class="fas fa-play-circle"></i> 快速入门</h2>
+                        <div class="help-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3>登录系统</h3>
+                                <p>使用您的用户名和密码登录系统。如果还没有账号，请联系管理员获取。</p>
                             </div>
-                            <div class="feature-card">
-                                <i class="fas fa-video"></i>
-                                <h3></h3>
-                                <p>?/p>
+                        </div>
+                        <div class="help-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3>选择作物类型</h3>
+                                <p>在左侧快捷选择或进入作物库选择要检测的作物类型。</p>
                             </div>
-                            <div class="feature-card">
-                                <i class="fas fa-layer-group"></i>
-                                <h3></h3>
-                                <p>?/p>
+                        </div>
+                        <div class="help-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3>上传图片</h3>
+                                <p>进入单图分析或批量分析页面，上传作物叶片图片。</p>
                             </div>
-                            <div class="feature-card">
-                                <i class="fas fa-chart-pie"></i>
-                                <h3>?/h3>
-                                <p>?/p>
+                        </div>
+                        <div class="help-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h3>查看结果</h3>
+                                <p>点击分析按钮，等待系统分析完成后查看成熟度检测结果。</p>
                             </div>
                         </div>
                     </div>
 
-                    <div id="upload" class="help-content">
-                        <h2><i class="fas fa-upload"></i> </h2>
-                        <ol>
-                            <li>""?"?/li>
-                            <li>?/li>
-                            <li>? JPGPNGBMPTIFF?/li>
-                            <li>?0MB?0?/li>
-                        </ol>
-                        <div class="tips-box">
-                            <h4> </h4>
-                            <ul>
-                                <li>?/li>
-                                <li>?/li>
-                                <li>?/li>
-                            </ul>
+                    <div class="help-section-content" id="analysis" style="display: none">
+                        <h2><i class="fas fa-search"></i> 分析功能</h2>
+                        <div class="help-card">
+                            <h3>单图分析</h3>
+                            <p>上传单张图片进行成熟度检测，适合快速检测单株作物。</p>
+                        </div>
+                        <div class="help-card">
+                            <h3>批量分析</h3>
+                            <p>一次性上传多张图片进行批量检测，提高检测效率。</p>
+                        </div>
+                        <div class="help-card">
+                            <h3>区域分析</h3>
+                            <p>对一片区域进行成熟度检测和热力图可视化。</p>
                         </div>
                     </div>
 
-                    <div id="analysis" class="help-content">
-                        <h2><i class="fas fa-search"></i> </h2>
-                        <div class="step-by-step">
-                            <div class="step">
-                                <div class="step-number">1</div>
-                                <div class="step-content">
-                                    <h4></h4>
-                                    <p>?/p>
-                                </div>
-                            </div>
-                            <div class="step">
-                                <div class="step-number">2</div>
-                                <div class="step-content">
-                                    <h4></h4>
-                                    <p>?/p>
-                                </div>
-                            </div>
-                            <div class="step">
-                                <div class="step-number">3</div>
-                                <div class="step-content">
-                                    <h4>?/h4>
-                                    <p>"??/p>
-                                </div>
-                            </div>
-                            <div class="step">
-                                <div class="step-number">4</div>
-                                <div class="step-content">
-                                    <h4></h4>
-                                    <p>?/p>
-                                </div>
-                            </div>
+                    <div class="help-section-content" id="crops" style="display: none">
+                        <h2><i class="fas fa-seedling"></i> 作物管理</h2>
+                        <div class="help-card">
+                            <h3>支持的作物</h3>
+                            <p>系统目前支持甜椒、土豆、番茄、荔枝四种作物的叶片成熟度检测。</p>
+                        </div>
+                        <div class="help-card">
+                            <h3>成熟度标准</h3>
+                            <p>根据叶片颜色、形态等特征判断作物成熟度，分为幼嫩期、成熟期、衰老期三个等级。</p>
                         </div>
                     </div>
 
-                    <div id="results" class="help-content">
-                        <h2><i class="fas fa-chart-bar"></i> </h2>
-                        <p>?/p>
-                        <div class="result-explanation">
-                            <div class="explanation-item">
-                                <h4> ?/h4>
-                                <p>?/p>
-                            </div>
-                            <div class="explanation-item">
-                                <h4> ?/h4>
-                                <p>?/p>
-                            </div>
-                            <div class="explanation-item">
-                                <h4> ?/h4>
-                                <p>?/p>
-                            </div>
-                            <div class="explanation-item">
-                                <h4> </h4>
-                                <p>?/p>
-                            </div>
+                    <div class="help-section-content" id="reports" style="display: none">
+                        <h2><i class="fas fa-file-report"></i> 报告导出</h2>
+                        <div class="help-card">
+                            <h3>导出格式</h3>
+                            <p>支持导出PDF和CSV格式的分析报告，方便存档和分享。</p>
+                        </div>
+                        <div class="help-card">
+                            <h3>报告内容</h3>
+                            <p>报告包含检测结果、成熟度分布图表、检测时间等详细信息。</p>
                         </div>
                     </div>
 
-                    <div id="batch" class="help-content">
-                        <h2><i class="fas fa-layer-group"></i> </h2>
-                        <p>?/p>
-                        <ol>
-                            <li>""</li>
-                            <li></li>
-                            <li></li>
-                            <li>"?</li>
-                            <li>?/li>
-                        </ol>
-                        <div class="tips-box">
-                            <h4> </h4>
-                            <ul>
-                                <li></li>
-                                <li>?/li>
-                                <li></li>
-                            </ul>
+                    <div class="help-section-content" id="faq" style="display: none">
+                        <h2><i class="fas fa-question-circle"></i> 常见问题</h2>
+                        <div class="faq-item">
+                            <div class="faq-question">为什么上传图片失败？</div>
+                            <div class="faq-answer">请检查图片格式是否正确（支持JPG、PNG、BMP），文件大小是否超过50MB限制。</div>
                         </div>
-                    </div>
-
-                    <div id="faq" class="help-content">
-                        <h2><i class="fas fa-question-circle"></i> </h2>
-                        <div class="faq-list">
-                            <div class="faq-item">
-                                <h4>?/h4>
-                                <p>JPGPNGBMP50MB?/p>
-                            </div>
-                            <div class="faq-item">
-                                <h4></h4>
-                                <p>?/p>
-                            </div>
-                            <div class="faq-item">
-                                <h4>?/h4>
-                                <p>?/p>
-                            </div>
-                            <div class="faq-item">
-                                <h4>?/h4>
-                                <p>""CSV?/p>
-                            </div>
-                            <div class="faq-item">
-                                <h4>?/h4>
-                                <p>""?/p>
-                            </div>
+                        <div class="faq-item">
+                            <div class="faq-question">检测结果不准确怎么办？</div>
+                            <div class="faq-answer">请确保图片清晰、光照充足，叶片完整可见。可以尝试调整检测精度设置。</div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">如何添加新作物？</div>
+                            <div class="faq-answer">请联系系统管理员，提供作物样本图片进行模型训练和添加。</div>
                         </div>
                     </div>
                 </div>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crop Maturity Analysis System - Dashboard</title>
+    <title>Crop Maturity Analysis System - 仪表盘</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/static/css/style.css">
@@ -19,11 +19,11 @@
         
         <main class="main-content" id="mainContent">
             <div class="page-header animate-fade-in">
-                <h1>Dashboard</h1>
-                <p>Welcome back! Here is your crop detection overview</p>
+                <h1>仪表盘</h1>
+                <p>欢迎回来！这是您的作物检测概览</p>
                 <div class="header-actions">
-                    <button class="btn btn-primary" id="exportReportBtn"><i class="fas fa-download"></i> Export Report</button>
-                    <button class="btn btn-outline" id="refreshDataBtn"><i class="fas fa-refresh"></i> Refresh Data</button>
+                    <button class="btn btn-primary" id="exportReportBtn"><i class="fas fa-download"></i> 导出报告</button>
+                    <button class="btn btn-outline" id="refreshDataBtn"><i class="fas fa-refresh"></i> 刷新数据</button>
                 </div>
             </div>
 
@@ -34,7 +34,7 @@
                     </div>
                     <div class="stat-info">
                         <div class="stat-value" id="statTotal">0</div>
-                        <div class="stat-label">Total Today</div>
+                        <div class="stat-label">今日检测总数</div>
                     </div>
                 </div>
                 
@@ -43,8 +43,8 @@
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="stat-info">
-                        <div class="stat-value" id="statMature">0</div>
-                        <div class="stat-label">Mature Crops</div>
+                        <div class="stat-value" id="stat成熟率">0</div>
+                        <div class="stat-label">成熟率 检测作物</div>
                     </div>
                 </div>
                 
@@ -54,7 +54,7 @@
                     </div>
                     <div class="stat-info">
                         <div class="stat-value" id="statRate">0%</div>
-                        <div class="stat-label">Maturity Rate</div>
+                        <div class="stat-label">整体成熟率</div>
                     </div>
                 </div>
                 
@@ -64,7 +64,7 @@
                     </div>
                     <div class="stat-info">
                         <div class="stat-value" id="statTime">0</div>
-                        <div class="stat-label">Avg Time(s)</div>
+                        <div class="stat-label">平均分析时长(秒)</div>
                     </div>
                 </div>
             </div>
@@ -72,11 +72,11 @@
             <div class="charts-row">
                 <div class="chart-card animate-fade-in" style="animation-delay: 0.5s">
                     <div class="card-header">
-                        <h3><i class="fas fa-pie-chart"></i> Maturity Distribution</h3>
+                        <h3><i class="fas fa-pie-chart"></i> 成熟度分布</h3>
                         <select class="chart-filter">
-                            <option>Today</option>
-                            <option>This Week</option>
-                            <option>This Month</option>
+                            <option>今日</option>
+                            <option>本周</option>
+                            <option>本月</option>
                         </select>
                     </div>
                     <div class="chart-container">
@@ -86,11 +86,11 @@
                 
                 <div class="chart-card animate-fade-in" style="animation-delay: 0.6s">
                     <div class="card-header">
-                        <h3><i class="fas fa-line-chart"></i> Detection Trend</h3>
+                        <h3><i class="fas fa-line-chart"></i> 检测趋势</h3>
                         <select class="chart-filter">
-                            <option>7 Days</option>
-                            <option>30 Days</option>
-                            <option>90 Days</option>
+                            <option>7天</option>
+                            <option>30天</option>
+                            <option>90天</option>
                         </select>
                     </div>
                     <div class="chart-container">
@@ -102,7 +102,7 @@
             <div class="charts-row">
                 <div class="chart-card animate-fade-in" style="animation-delay: 0.7s">
                     <div class="card-header">
-                        <h3><i class="fas fa-bar-chart"></i> Quality Score</h3>
+                        <h3><i class="fas fa-bar-chart"></i> 品质评分分布</h3>
                     </div>
                     <div class="chart-container">
                         <canvas id="qualityBar"></canvas>
@@ -111,7 +111,7 @@
                 
                 <div class="chart-card animate-fade-in" style="animation-delay: 0.8s">
                     <div class="card-header">
-                        <h3><i class="fas fa-radar"></i> Feature Analysis</h3>
+                        <h3><i class="fas fa-radar"></i> 特征分析</h3>
                     </div>
                     <div class="chart-container">
                         <canvas id="radarChart"></canvas>
@@ -122,8 +122,8 @@
             <div class="bottom-section">
                 <div class="recent-analysis animate-fade-in" style="animation-delay: 0.9s">
                     <div class="card-header">
-                        <h3><i class="fas fa-history"></i> Recent Records</h3>
-                        <a href="#history" class="view-all">View All</a>
+                        <h3><i class="fas fa-history"></i> 最近检测</h3>
+                        <a href="#history" class="view-all">查看全部</a>
                     </div>
                     <div class="recent-list" id="recentList">
                         <div class="recent-item">
@@ -131,58 +131,58 @@
                                 <i class="fas fa-image"></i>
                             </div>
                             <div class="recent-info">
-                                <div class="recent-name">Pepper_field.jpg</div>
-                                <div class="recent-meta">Pepper  10 min ago  85%</div>
+                                <div class="recent-name">甜椒_field.jpg</div>
+                                <div class="recent-meta">甜椒  10 min ago  85%</div>
                             </div>
-                            <div class="recent-status completed">Completed</div>
+                            <div class="recent-status 完成">Completed</div>
                         </div>
                         <div class="recent-item">
                             <div class="recent-thumb">
                                 <i class="fas fa-image"></i>
                             </div>
                             <div class="recent-info">
-                                <div class="recent-name">Potato_field.jpg</div>
-                                <div class="recent-meta">Potato  30 min ago  78%</div>
+                                <div class="recent-name">土豆_field.jpg</div>
+                                <div class="recent-meta">土豆  30 min ago  78%</div>
                             </div>
-                            <div class="recent-status completed">Completed</div>
+                            <div class="recent-status 完成">Completed</div>
                         </div>
                         <div class="recent-item">
                             <div class="recent-thumb">
                                 <i class="fas fa-image"></i>
                             </div>
                             <div class="recent-info">
-                                <div class="recent-name">Tomato_greenhouse.jpg</div>
-                                <div class="recent-meta">Tomato  1 hour ago  92%</div>
+                                <div class="recent-name">番茄_greenhouse.jpg</div>
+                                <div class="recent-meta">番茄  1 hour ago  92%</div>
                             </div>
-                            <div class="recent-status completed">Completed</div>
+                            <div class="recent-status 完成">Completed</div>
                         </div>
                     </div>
                 </div>
                 
                 <div class="crop-summary animate-fade-in" style="animation-delay: 1s">
                     <div class="card-header">
-                        <h3><i class="fas fa-seedling"></i> Crop Distribution</h3>
+                        <h3><i class="fas fa-seedling"></i> 作物类型分布</h3>
                     </div>
                     <div class="crop-distribution">
                         <div class="crop-item">
-                            <span class="crop-icon">Pepper</span>
-                            <span class="crop-name">Pepper</span>
+                            <span class="crop-icon">甜椒</span>
+                            <span class="crop-name">甜椒</span>
                             <div class="crop-progress">
                                 <div class="progress-fill" style="width: 46%"></div>
                             </div>
                             <span class="crop-count">46%</span>
                         </div>
                         <div class="crop-item">
-                            <span class="crop-icon">Potato</span>
-                            <span class="crop-name">Potato</span>
+                            <span class="crop-icon">土豆</span>
+                            <span class="crop-name">土豆</span>
                             <div class="crop-progress">
                                 <div class="progress-fill" style="width: 5%"></div>
                             </div>
                             <span class="crop-count">5%</span>
                         </div>
                         <div class="crop-item">
-                            <span class="crop-icon">Tomato</span>
-                            <span class="crop-name">Tomato</span>
+                            <span class="crop-icon">番茄</span>
+                            <span class="crop-name">番茄</span>
                             <div class="crop-progress">
                                 <div class="progress-fill" style="width: 49%"></div>
                             </div>

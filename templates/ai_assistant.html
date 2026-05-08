@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI助手 - 作物成熟度检测系统</title>
+    <title>AI - ?/title>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <style>
         * {
@@ -293,11 +293,11 @@
     <div class="chat-container">
         <div class="chat-header">
             <button class="back-btn" onclick="goBack()">
-                <i class="fa fa-arrow-left"></i> 返回系统
+                <i class="fa fa-arrow-left"></i> 
             </button>
             <div class="header-title">
-                <h2><i class="fa fa-robot"></i> AI助手</h2>
-                <p>有什么可以帮助您的？</p>
+                <h2><i class="fa fa-robot"></i> AI</h2>
+                <p></p>
             </div>
         </div>
 
@@ -306,32 +306,32 @@
                 <div class="message-content">
                     <div class="bot-avatar"><i class="fa fa-leaf"></i></div>
                     <div class="bot-text">
-                        您好！我是作物成熟度检测系统的AI助手。我可以帮助您了解系统功能、使用方法等。请问有什么可以帮助您的？
+                        AI
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="quick-questions">
-            <p>快速提问：</p>
+            <p></p>
             <div class="tags">
-                <span class="tag" onclick="sendMessage('程序有什么功能？')">程序功能</span>
-                <span class="tag" onclick="sendMessage('如何上传图片？')">上传图片</span>
-                <span class="tag" onclick="sendMessage('如何下载报告？')">下载报告</span>
-                <span class="tag" onclick="sendMessage('支持哪些作物？')">支持作物</span>
-                <span class="tag" onclick="sendMessage('如何使用批量分析？')">批量分析</span>
-                <span class="tag" onclick="sendMessage('分析结果如何解读？')">结果解读</span>
-                <span class="tag" onclick="sendMessage('如何使用视频分析？')">视频分析</span>
-                <span class="tag" onclick="sendMessage('如何查看历史记录？')">历史记录</span>
-                <span class="tag" onclick="sendMessage('如何登录系统？')">登录</span>
-                <span class="tag" onclick="sendMessage('仪表盘有什么功能？')">仪表盘</span>
-                <span class="tag" onclick="sendMessage('成熟度判定标准是什么？')">成熟度标准</span>
-                <span class="tag" onclick="sendMessage('帮助')">帮助</span>
+                <span class="tag" onclick="sendMessage('')"></span>
+                <span class="tag" onclick="sendMessage('?)"></span>
+                <span class="tag" onclick="sendMessage('?)"></span>
+                <span class="tag" onclick="sendMessage('?)"></span>
+                <span class="tag" onclick="sendMessage('?)"></span>
+                <span class="tag" onclick="sendMessage('?)"></span>
+                <span class="tag" onclick="sendMessage('?)"></span>
+                <span class="tag" onclick="sendMessage('?)"></span>
+                <span class="tag" onclick="sendMessage('?)"></span>
+                <span class="tag" onclick="sendMessage('')">?/span>
+                <span class="tag" onclick="sendMessage('')">?/span>
+                <span class="tag" onclick="sendMessage('')"></span>
             </div>
         </div>
 
         <div class="chat-input">
-            <input type="text" id="userInput" placeholder="输入您的问题..." onkeydown="if(event.keyCode==13) sendMessage()">
+            <input type="text" id="userInput" placeholder="..." onkeydown="if(event.keyCode==13) sendMessage()">
             <button onclick="sendMessage()"><i class="fa fa-paper-plane"></i></button>
         </div>
     </div>
@@ -343,18 +343,18 @@
 
         function parseAnswer(answer) {
             var pageMap = {
-                '分析页面': '/analysis',
-                '批量分析': '/batch',
-                '仪表盘': '/dashboard',
-                '历史记录': '/history',
-                '作物库': '/crops',
-                '帮助页面': '/help',
-                'AI助手': '/ai'
+                '': '/analysis',
+                '': '/batch',
+                '?: '/dashboard',
+                '': '/history',
+                '?: '/crops',
+                '': '/help',
+                'AI': '/ai'
             };
 
             var parsed = answer;
 
-            parsed = parsed.replace(/\[跳转:([^\]]+)\]([^\[]+)\[\/跳转\]/g, function(match, pageName, linkText) {
+            parsed = parsed.replace(/\[:([^\]]+)\]([^\[]+)\[\/\]/g, function(match, pageName, linkText) {
                 var url = pageMap[pageName.trim()];
                 if (url) {
                     return '<a href="' + url + '" class="jump-link" target="_top">' + linkText.trim() + '</a>';
@@ -362,7 +362,7 @@
                 return match;
             });
 
-            parsed = parsed.replace(/\[跳转:([^\]]+)\]/g, function(match, pageName) {
+            parsed = parsed.replace(/\[:([^\]]+)\]/g, function(match, pageName) {
                 var url = pageMap[pageName.trim()];
                 if (url) {
                     return '<a href="' + url + '" class="jump-link" target="_top">' + pageName + '</a>';
@@ -429,7 +429,7 @@
                 errorMessage.innerHTML = `
                     <div class="message-content">
                         <div class="bot-avatar"><i class="fa fa-leaf"></i></div>
-                        <div class="bot-text">抱歉，我暂时无法回答您的问题，请稍后再试。</div>
+                        <div class="bot-text">?/div>
                     </div>
                 `;
                 chatMessages.appendChild(errorMessage);

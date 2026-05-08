@@ -3,224 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>作物成熟度检测系统 - 欢迎页</title>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <title> - </title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #2e7d32 0%, #43a047 50%, #81c784 100%);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
         }
-
         .welcome-container {
+            background: white;
+            border-radius: 24px;
+            padding: 48px 64px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
             text-align: center;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 60px 80px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
             animation: fadeIn 0.6s ease-out;
         }
-
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        .logo-section {
-            margin-bottom: 30px;
-        }
-
         .logo {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, #2e7d32, #43a047);
+            border-radius: 20px;
             display: flex;
-            justify-content: center;
             align-items: center;
-            margin: 0 auto 20px;
-            box-shadow: 0 10px 30px rgba(17, 153, 142, 0.4);
-        }
-
-        .logo i {
-            font-size: 60px;
+            justify-content: center;
+            font-size: 2.5rem;
             color: white;
         }
-
         h1 {
-            font-size: 2.5rem;
-            color: #333;
-            margin-bottom: 10px;
-            font-weight: 700;
+            font-size: 1.8rem;
+            color: #1b5e20;
+            margin-bottom: 12px;
         }
-
         .subtitle {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #666;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
-
         .features {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
-            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
         }
-
-        .feature-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 25px;
-            border-radius: 15px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        .feature-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            background: #f5f5f5;
+            border-radius: 12px;
+            min-width: 100px;
         }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        .feature-item i {
+            font-size: 1.5rem;
+            color: #2e7d32;
         }
-
-        .feature-icon {
-            font-size: 36px;
-            color: #11998e;
-            margin-bottom: 15px;
-        }
-
-        .feature-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-        }
-
-        .feature-desc {
-            font-size: 0.9rem;
+        .feature-item span {
+            font-size: 0.8rem;
             color: #666;
-            line-height: 1.5;
         }
-
         .btn-group {
             display: flex;
-            gap: 20px;
-            justify-content: center;
+            flex-direction: column;
+            gap: 12px;
         }
-
         .btn {
-            padding: 15px 40px;
-            font-size: 1.1rem;
-            border-radius: 50px;
+            padding: 14px 32px;
             border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
             cursor: pointer;
-            font-weight: 600;
             transition: all 0.3s ease;
         }
-
         .btn-primary {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            background: linear-gradient(135deg, #2e7d32, #43a047);
             color: white;
-            box-shadow: 0 5px 20px rgba(17, 153, 142, 0.4);
+            box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
         }
-
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
         }
-
-        .btn-secondary {
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #2e7d32;
+            color: #2e7d32;
         }
-
-        .btn-secondary:hover {
-            background: #667eea;
+        .btn-outline:hover {
+            background: #2e7d32;
             color: white;
         }
-
         .footer {
-            margin-top: 40px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #eee;
+            font-size: 0.85rem;
             color: #999;
-            font-size: 0.9rem;
         }
-
-        @media (max-width: 900px) {
-            .features {
-                grid-template-columns: 1fr;
-            }
-            
+        @media (max-width: 600px) {
             .welcome-container {
-                padding: 40px 30px;
-                margin: 20px;
+                padding: 32px 24px;
             }
-            
             h1 {
-                font-size: 2rem;
+                font-size: 1.5rem;
+            }
+            .features {
+                gap: 12px;
+            }
+            .feature-item {
+                min-width: 80px;
+                padding: 12px;
             }
         }
     </style>
 </head>
 <body>
     <div class="welcome-container">
-        <div class="logo-section">
-            <div class="logo">
-                <i class="fa fa-leaf"></i>
-            </div>
-            <h1>作物成熟度检测系统</h1>
-            <p class="subtitle">基于深度学习的智能作物分析平台</p>
-        </div>
-
+        <div class="logo"></div>
+        <h1></h1>
+        <p class="subtitle"></p>
+        
         <div class="features">
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fa fa-image"></i>
-                </div>
-                <div class="feature-title">图像识别</div>
-                <div class="feature-desc">高精度叶片检测与成熟度分析</div>
+            <div class="feature-item">
+                <i class="fas fa-image"></i>
+                <span></span>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fa fa-video-camera"></i>
-                </div>
-                <div class="feature-title">视频分析</div>
-                <div class="feature-desc">实时视频流作物状态监测</div>
+            <div class="feature-item">
+                <i class="fas fa-chart-bar"></i>
+                <span></span>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fa fa-bar-chart"></i>
-                </div>
-                <div class="feature-title">数据分析</div>
-                <div class="feature-desc">可视化报告与批量处理功能</div>
+            <div class="feature-item">
+                <i class="fas fa-map"></i>
+                <span></span>
             </div>
         </div>
-
+        
         <div class="btn-group">
-            <button class="btn btn-primary" onclick="window.location.href='/login'">
-                <i class="fa fa-sign-in"></i> 登录系统
+            <button class="btn btn-primary" onclick="location.href='/dashboard'">
+                <i class="fas fa-sign-in-alt"></i> 
             </button>
-            <button class="btn btn-secondary" onclick="window.location.href='/help'">
-                <i class="fa fa-question-circle"></i> 了解更多
-            </button>
-            <button class="btn btn-secondary" onclick="window.location.href='/ai'">
-                <i class="fa fa-robot"></i> AI助手
+            <button class="btn btn-outline" onclick="location.href='/help'">
+                <i class="fas fa-question-circle"></i> 
             </button>
         </div>
-
+        
         <div class="footer">
-            © 2026 作物成熟度检测系统 | 智能农业解决方案
+             2026  |  1.0.0
         </div>
     </div>
 </body>

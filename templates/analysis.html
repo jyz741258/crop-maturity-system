@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌾 作物成熟度分析系统 - 单图分析</title>
+    <title> ?- </title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css"><link rel="stylesheet" href="/static/css/responsive.css">
     <link rel="stylesheet" href="/static/css/animations.css">
 </head>
 <body>
@@ -17,76 +17,76 @@
         
         <main class="main-content" id="mainContent">
             <div class="page-header animate-fade-in">
-                <h1>单图分析</h1>
-                <p>上传作物图片进行成熟度检测分析</p>
+                <h1></h1>
+                <p>?/p>
             </div>
 
             <div class="analysis-container">
                 <div class="upload-section animate-fade-in" style="animation-delay: 0.1s">
                     <div class="section-header">
-                        <h2><i class="fas fa-upload"></i> 上传图片</h2>
+                        <h2><i class="fas fa-upload"></i> </h2>
                     </div>
                     
                     <div class="upload-area" id="uploadArea">
                         <div class="upload-icon">
                             <i class="fas fa-cloud-upload-alt"></i>
                         </div>
-                        <p>拖拽图片到此处或点击上传</p>
-                        <p class="upload-hint">支持 JPG、PNG、BMP 格式，最大 50MB</p>
+                        <p></p>
+                        <p class="upload-hint"> JPGPNGBMP ?50MB</p>
                         <input type="file" id="fileInput" accept="image/*" style="display: none">
                     </div>
                     
                     <div class="preview-section" id="previewSection">
                         <div class="preview-placeholder">
                             <i class="fas fa-image"></i>
-                            <p>等待上传图片</p>
+                            <p></p>
                         </div>
                     </div>
                 </div>
 
                 <div class="settings-section animate-fade-in" style="animation-delay: 0.2s">
                     <div class="section-header">
-                        <h2><i class="fas fa-cog"></i> 参数设置</h2>
+                        <h2><i class="fas fa-cog"></i> </h2>
                     </div>
                     
                     <div class="settings-card">
                         <div class="setting-item">
-                            <label>作物类型</label>
+                            <label></label>
                             <div class="crop-selector" id="cropSelector">
                                 <div class="crop-chip active" data-crop="Pepper__bell">
-                                    <span>🫑</span>
-                                    <span>甜椒</span>
+                                    <span></span>
+                                    <span></span>
                                 </div>
                                 <div class="crop-chip" data-crop="Potato">
-                                    <span>🥔</span>
-                                    <span>土豆</span>
+                                    <span></span>
+                                    <span></span>
                                 </div>
                                 <div class="crop-chip" data-crop="Tomato">
-                                    <span>🍅</span>
-                                    <span>番茄</span>
+                                    <span></span>
+                                    <span></span>
                                 </div>
                                 <div class="crop-chip" data-crop="Lychee">
-                                    <span>🍒</span>
-                                    <span>荔枝</span>
+                                    <span></span>
+                                    <span></span>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="setting-item">
                             <div class="setting-label">
-                                <label>检测敏感度</label>
+                                <label></label>
                                 <span class="setting-value">50%</span>
                             </div>
                             <input type="range" id="sensitivitySlider" min="10" max="100" value="50">
                             <div class="slider-labels">
-                                <span>低</span>
-                                <span>高</span>
+                                <span>?/span>
+                                <span>?/span>
                             </div>
                         </div>
                         
                         <div class="setting-item">
                             <div class="setting-label">
-                                <label>置信度阈值</label>
+                                <label>?/label>
                                 <span class="setting-value">0.5</span>
                             </div>
                             <input type="range" id="confidenceSlider" min="0" max="1" step="0.05" value="0.5">
@@ -99,7 +99,7 @@
                         <div class="setting-item">
                             <label class="checkbox-label">
                                 <input type="checkbox" id="showConfidence" checked>
-                                <span>显示置信度标签</span>
+                                <span>?/span>
                             </label>
                         </div>
                     </div>
@@ -108,34 +108,34 @@
                 <div class="action-section animate-fade-in" style="animation-delay: 0.3s">
                     <button class="btn btn-primary btn-lg" id="analyzeBtn">
                         <i class="fas fa-play"></i>
-                        开始分析
+                        ?
                     </button>
                     <button class="btn btn-outline btn-lg" id="clearBtn">
                         <i class="fas fa-trash"></i>
-                        清除
+                        
                     </button>
                 </div>
             </div>
 
             <div class="analysis-result" id="analysisResult" style="display: none;">
                 <div class="page-header animate-fade-in">
-                    <h1>分析结果</h1>
-                    <p>检测完成，以下是分析报告</p>
+                    <h1></h1>
+                    <p>?/p>
                 </div>
                 
                 <div class="result-content">
                     <div class="result-images animate-fade-in" style="animation-delay: 0.1s">
                         <div class="image-card">
                             <div class="card-header">
-                                <h3>原图</h3>
+                                <h3></h3>
                             </div>
-                            <img id="originalImage" src="" alt="原图" class="result-image">
+                            <img id="originalImage" src="" alt="" class="result-image">
                         </div>
                         <div class="image-card">
                             <div class="card-header">
-                                <h3>标注图</h3>
+                                <h3>?/h3>
                             </div>
-                            <img id="markedImage" src="" alt="标注图" class="result-image">
+                            <img id="markedImage" src="" alt="? class="result-image">
                         </div>
                     </div>
                     
@@ -147,7 +147,7 @@
                                 </div>
                                 <div class="stat-info">
                                     <div class="stat-value" id="resultTotal">0</div>
-                                    <div class="stat-label">检测总数</div>
+                                    <div class="stat-label"></div>
                                 </div>
                             </div>
                             <div class="stat-card">
@@ -156,7 +156,7 @@
                                 </div>
                                 <div class="stat-info">
                                     <div class="stat-value" id="resultMature">0</div>
-                                    <div class="stat-label">成熟期数量</div>
+                                    <div class="stat-label">?/div>
                                 </div>
                             </div>
                             <div class="stat-card">
@@ -165,7 +165,7 @@
                                 </div>
                                 <div class="stat-info">
                                     <div class="stat-value" id="resultRate">0%</div>
-                                    <div class="stat-label">成熟率</div>
+                                    <div class="stat-label">?/div>
                                 </div>
                             </div>
                             <div class="stat-card">
@@ -174,7 +174,7 @@
                                 </div>
                                 <div class="stat-info">
                                     <div class="stat-value" id="resultTime">0s</div>
-                                    <div class="stat-label">分析时长</div>
+                                    <div class="stat-label"></div>
                                 </div>
                             </div>
                         </div>
@@ -182,7 +182,7 @@
                     
                     <div class="result-details animate-fade-in" style="animation-delay: 0.3s">
                         <div class="card-header">
-                            <h3><i class="fas fa-list"></i> 检测详情</h3>
+                            <h3><i class="fas fa-list"></i> ?/h3>
                         </div>
                         <div class="detection-list" id="detectionList"></div>
                     </div>

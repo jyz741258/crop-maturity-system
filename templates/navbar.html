@@ -1,11 +1,11 @@
 <nav class="navbar">
     <div class="navbar-left">
-        <button class="sidebar-toggle" id="sidebarToggle" aria-label="切换侧边栏">
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
             <i class="fas fa-bars"></i>
         </button>
         <div class="logo">
             <i class="fas fa-leaf"></i>
-            <span>作物成熟度分析系统</span>
+            <span>Crop Maturity System</span>
         </div>
     </div>
     
@@ -13,27 +13,27 @@
         <div class="nav-links">
             <a href="#dashboard" class="nav-link active" data-page="dashboard">
                 <i class="fas fa-home"></i>
-                <span>仪表盘</span>
+                <span>Dashboard</span>
             </a>
             <a href="#analysis" class="nav-link" data-page="analysis">
                 <i class="fas fa-search"></i>
-                <span>单图分析</span>
+                <span>Single Analysis</span>
             </a>
             <a href="#batch" class="nav-link" data-page="batch">
                 <i class="fas fa-layer-group"></i>
-                <span>批量分析</span>
+                <span>Batch Analysis</span>
             </a>
             <a href="#history" class="nav-link" data-page="history">
                 <i class="fas fa-history"></i>
-                <span>历史记录</span>
+                <span>History</span>
             </a>
             <a href="#crops" class="nav-link" data-page="crops">
                 <i class="fas fa-seedling"></i>
-                <span>作物库</span>
+                <span>Crops</span>
             </a>
             <a href="#help" class="nav-link" data-page="help">
                 <i class="fas fa-question-circle"></i>
-                <span>帮助</span>
+                <span>Help</span>
             </a>
         </div>
     </div>
@@ -41,9 +41,9 @@
     <div class="navbar-right">
         <div class="search-box">
             <i class="fas fa-search"></i>
-            <input type="text" placeholder="搜索记录...">
+            <input type="text" placeholder="Search records...">
         </div>
-        <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
             <i class="fas fa-moon"></i>
         </button>
         <div class="notification-badge">
@@ -55,18 +55,18 @@
                 <i class="fas fa-user"></i>
             </div>
             <div class="user-info">
-                <span class="user-name">{{ username if username else '访客' }}</span>
-                <span class="user-role">{% if username == '管理员' %}系统管理员{% else %}普通用户{% endif %}</span>
+                <span class="user-name">{{ username if username else 'Guest' }}</span>
+                <span class="user-role">{% if username == 'admin' %}Admin{% else %}User{% endif %}</span>
             </div>
             <i class="fas fa-chevron-down"></i>
         </div>
     </div>
     
     <div class="dropdown-menu" id="userDropdown">
-        <a href="#profile"><i class="fas fa-user"></i> 个人资料</a>
-        <a href="#settings"><i class="fas fa-cog"></i> 系统设置</a>
-        <a href="#help-center"><i class="fas fa-question-circle"></i> 帮助中心</a>
+        <a href="#profile"><i class="fas fa-user"></i> Profile</a>
+        <a href="#settings"><i class="fas fa-cog"></i> Settings</a>
+        <a href="#help-center"><i class="fas fa-question-circle"></i> Help Center</a>
         <hr>
-        <a href="/logout"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
+        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 </nav>

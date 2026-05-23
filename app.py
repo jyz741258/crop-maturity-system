@@ -30,14 +30,20 @@ try:
     from models.crop_detector import CropDetector
     from models.feature_extractor import FeatureExtractor
     from models.classifier import MaturityClassifier
+    from models.maturity_detector import MaturityDetector
     from utils.visualizer import ImageVisualizer
     from utils.video_processor import VideoProcessor
+    from utils.export_utils import ExportUtils
+    from utils.dashboard_config import DashboardConfig
     from data.maturity_standards import get_maturity_stage, get_all_crop_types, get_crop_standards
 
     crop_detector = CropDetector()
     feature_extractor = FeatureExtractor()
     maturity_classifier = MaturityClassifier()
     visualizer = ImageVisualizer()
+    maturity_detector = MaturityDetector()
+    export_utils = ExportUtils()
+    dashboard_config = DashboardConfig()
 
     if os.path.exists('models/maturity_model.pkl'):
         maturity_classifier.load_model('models/maturity_model.pkl')
@@ -886,6 +892,130 @@ def ai_ask():
             'success': False,
             'error': str(e)
         }), 500
+
+@app.route('/api/analyze_maturity', methods=['POST'])
+@login_required
+def analyze_maturity():
+    try:
+        if 'image' not in request.files:
+            return jsonify({'error': '未上传图片'}), 400
+        
+        file = request.files['image']
+        crop_type = request.form.get('crop_type', 'Tomato')
+        
+        if file.filename == '':
+            return jsonify({'error': '未选择图片'}), 400
+        
+        temp_path = os.path.join('temp', f'temp_{datetime.now().strftime("%Y%m%d_%H%M%S")}_{secure_filename(file.filename)}')
+        file.save(temp_path)
+        
+        results = maturity_detector.detect_crops(temp_path)
+        
+        for res in results:
+            res['crop_type'] = crop_type
+        
+        summary = export_utils.generate_summary(results)
+        
+        os.remove(temp_path)
+        
+        return jsonify({
+            'success': True,
+            'detections': results,
+            'summary': summary,
+            'crop_type': crop_type,
+            'analysis_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/export_data', methods=['POST'])
+@login_required
+def export_data():
+    try:
+        data = request.get_json()
+        export_format = data.get('format', 'csv')
+        analysis_data = data.get('data', [])
+        
+        if not analysis_data:
+            return jsonify({'error': '无数据可导出'}), 400
+        
+        file_path = None
+        
+        if export_format == 'csv':
+            file_path = export_utils.export_to_csv(analysis_data)
+        elif export_format == 'excel':
+            file_path = export_utils.export_to_excel(analysis_data)
+        elif export_format == 'pdf':
+            file_path = export_utils.export_to_pdf(analysis_data)
+        elif export_format == 'json':
+            file_path = export_utils.export_as_json(analysis_data)
+        
+        if not file_path:
+            return jsonify({'error': '导出失败'}), 500
+        
+        return jsonify({
+            'success': True,
+            'file_path': file_path,
+            'download_url': f'/download_export/{os.path.basename(file_path)}',
+            'format': export_format
+        })
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/download_export/<filename>')
+@login_required
+def download_export(filename):
+    return send_file(os.path.join('exports', filename), as_attachment=True)
+
+@app.route('/api/dashboard/config', methods=['GET', 'POST'])
+@login_required
+def dashboard_config_api():
+    if request.method == 'GET':
+        return jsonify(dashboard_config.to_dict())
+    
+    try:
+        data = request.get_json()
+        dashboard_config.update_config(data)
+        return jsonify({'success': True, 'config': dashboard_config.to_dict()})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/dashboard/toggle_chart', methods=['POST'])
+@login_required
+def toggle_chart():
+    try:
+        data = request.get_json()
+        chart_id = data.get('chart_id')
+        
+        if dashboard_config.toggle_chart(chart_id):
+            return jsonify({'success': True, 'chart_id': chart_id, 'visible': True})
+        return jsonify({'error': '图表不存在'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/dashboard/toggle_stat', methods=['POST'])
+@login_required
+def toggle_stat():
+    try:
+        data = request.get_json()
+        stat_id = data.get('stat_id')
+        
+        if dashboard_config.toggle_stat_card(stat_id):
+            return jsonify({'success': True, 'stat_id': stat_id})
+        return jsonify({'error': '统计项不存在'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/dashboard/reset', methods=['POST'])
+@login_required
+def reset_dashboard_config():
+    try:
+        dashboard_config.reset_to_default()
+        return jsonify({'success': True, 'config': dashboard_config.to_dict()})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     try:

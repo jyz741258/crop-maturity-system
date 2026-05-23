@@ -1460,10 +1460,52 @@ body {
     font-weight: 500;
 }
 
+.maturity-badge.mature { background: rgba(39, 174, 96, 0.15); color: #27ae60; }
+.maturity-badge.young { background: rgba(243, 156, 18, 0.15); color: #f39c12; }
+.maturity-badge.growing { background: rgba(52, 152, 219, 0.15); color: #3498db; }
+.maturity-badge.overripe { background: rgba(230, 126, 34, 0.15); color: #e67e22; }
+.maturity-badge.senescence { background: rgba(149, 165, 166, 0.15); color: #95a5a6; }
 .maturity-badge.成熟期 { background: rgba(39, 174, 96, 0.15); color: #27ae60; }
 .maturity-badge.幼嫩期 { background: rgba(243, 156, 18, 0.15); color: #f39c12; }
+.maturity-badge.生长期 { background: rgba(52, 152, 219, 0.15); color: #3498db; }
 .maturity-badge.过熟期 { background: rgba(230, 126, 34, 0.15); color: #e67e22; }
 .maturity-badge.衰老期 { background: rgba(149, 165, 166, 0.15); color: #95a5a6; }
+
+.detection-type-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    background: rgba(108, 122, 137, 0.15);
+    color: #6c7a89;
+    margin-right: 6px;
+}
+
+.stat-icon.plant-icon,
+.plant-icon {
+    background: rgba(39, 174, 96, 0.15);
+    color: #27ae60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon.leaf-icon,
+.leaf-icon {
+    background: rgba(52, 152, 219, 0.15);
+    color: #3498db;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon.total-icon,
+.total-icon {
+    background: rgba(155, 89, 182, 0.15);
+    color: #9b59b6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 .quality-score {
     padding: 4px 10px;

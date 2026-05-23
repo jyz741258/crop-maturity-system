@@ -3,23 +3,31 @@ class PageManager {
         this.currentPage = 'dashboard';
         this.sidebarCollapsed = false;
         this.isLoading = false;
-        this.charts = window.CropCharts ? new CropCharts() : null;
+        this.charts = {};
     }
 
     init() {
         console.log('PageManager.init() called');
-        this.bindAllEvents();
-        this.initMockData();
-        this.initCharts();
+        var self = this;
         
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
                 console.log('DOM fully loaded, calling initDashboard');
-                this.initDashboard();
+                self.bindAllEvents();
+                self.initMockData();
+                self.initDashboard();
+                setTimeout(() => {
+                    self.initCharts();
+                }, 500);
             });
         } else {
             console.log('DOM already loaded, calling initDashboard immediately');
+            this.bindAllEvents();
+            this.initMockData();
             this.initDashboard();
+            setTimeout(() => {
+                this.initCharts();
+            }, 500);
         }
     }
 
@@ -370,39 +378,59 @@ class PageManager {
 
     loadPage(pageName) {
         var self = this;
-        if (this.isLoading) return;
-        if (pageName === this.currentPage) return;
+        console.log('loadPage called:', pageName);
+        
+        if (this.isLoading) {
+            console.log('Already loading, ignoring');
+            return;
+        }
+        if (pageName === this.currentPage) {
+            console.log('Same page, ignoring');
+            return;
+        }
 
         this.isLoading = true;
         this.showLoading();
+        console.log('Loading overlay shown');
 
-        fetch('/' + pageName)
+        fetch('/' + pageName, {
+            method: 'GET',
+            credentials: 'include'
+        })
             .then(function(response) {
-                if (!response.ok) throw new Error('页面加载失败');
+                console.log('Response received:', response.status);
+                if (!response.ok) {
+                    throw new Error('HTTP error ' + response.status);
+                }
                 return response.text();
             })
             .then(function(content) {
+                console.log('Content received, length:', content.length);
                 var parser = new DOMParser();
                 var doc = parser.parseFromString(content, 'text/html');
                 var newMainContent = doc.querySelector('#mainContent');
 
                 var mainContent = document.getElementById('mainContent');
                 if (newMainContent && mainContent) {
+                    console.log('Updating main content');
                     mainContent.innerHTML = newMainContent.innerHTML;
                     self.currentPage = pageName;
                     self.updateNavActive(pageName);
                     self.bindAllEvents();
                     self.initPageContent(pageName);
+                } else {
+                    console.error('Could not find #mainContent in response');
                 }
 
                 self.isLoading = false;
                 self.hideLoading();
+                console.log('Loading complete');
             })
             .catch(function(error) {
                 console.error('Failed to load page:', error);
                 self.isLoading = false;
                 self.hideLoading();
-                self.showToast('页面加载失败', 'error');
+                self.showToast('页面加载失败: ' + error.message, 'error');
             });
     }
 
@@ -809,27 +837,202 @@ class PageManager {
     }
 
     initCharts() {
-        if (!this.charts) return;
+        console.log('initCharts called');
+        console.log('window.Chart:', window.Chart);
+        
+        if (!window.Chart) {
+            console.error('Chart.js is not loaded');
+            return;
+        }
+        
         var self = this;
-
+        
         setTimeout(function() {
-            if (document.getElementById('maturityPie')) {
-                self.charts.initMaturityPieChart('maturityPie', self.charts.createMockData().pieData);
+            console.log('Initializing charts...');
+            
+            var maturityPie = document.getElementById('maturityPie');
+            if (maturityPie) {
+                console.log('Initializing maturityPie chart');
+                try {
+                    if (self.charts.maturityPie) {
+                        self.charts.maturityPie.destroy();
+                    }
+                    self.charts.maturityPie = new Chart(maturityPie, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['幼嫩期', '生长期', '成熟期', '过熟期'],
+                            datasets: [{
+                                data: [15, 25, 45, 15],
+                                backgroundColor: ['#8bc34a', '#ffc107', '#4caf50', '#e53935'],
+                                borderWidth: 0,
+                                hoverOffset: 10
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            cutout: '65%',
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                    labels: {
+                                        padding: 20,
+                                        usePointStyle: true
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    console.log('maturityPie chart initialized');
+                } catch (e) {
+                    console.error('Error initializing maturityPie:', e);
+                }
             }
-            if (document.getElementById('trendChart')) {
-                self.charts.initTrendLineChart('trendChart', self.charts.createMockData().trendData);
+            
+            var trendChart = document.getElementById('trendChart');
+            if (trendChart) {
+                console.log('Initializing trendChart');
+                try {
+                    if (self.charts.trendChart) {
+                        self.charts.trendChart.destroy();
+                    }
+                    self.charts.trendChart = new Chart(trendChart, {
+                        type: 'line',
+                        data: {
+                            labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                            datasets: [{
+                                label: '成熟作物',
+                                data: [150, 180, 165, 200, 190, 220, 210],
+                                borderColor: '#4caf50',
+                                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 5,
+                                pointHoverRadius: 8
+                            }, {
+                                label: '生长期作物',
+                                data: [80, 75, 90, 85, 95, 88, 92],
+                                borderColor: '#ffc107',
+                                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 5,
+                                pointHoverRadius: 8
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'top' }
+                            },
+                            scales: {
+                                y: { beginAtZero: true },
+                                x: { grid: { display: false } }
+                            }
+                        }
+                    });
+                    console.log('trendChart initialized');
+                } catch (e) {
+                    console.error('Error initializing trendChart:', e);
+                }
             }
-            if (document.getElementById('radarChart')) {
-                self.charts.initRadarChart('radarChart', self.charts.createMockData().radarData);
+            
+            var qualityBar = document.getElementById('qualityBar');
+            if (qualityBar) {
+                console.log('Initializing qualityBar');
+                try {
+                    if (self.charts.qualityBar) {
+                        self.charts.qualityBar.destroy();
+                    }
+                    self.charts.qualityBar = new Chart(qualityBar, {
+                        type: 'bar',
+                        data: {
+                            labels: ['甜椒', '土豆', '番茄', '荔枝'],
+                            datasets: [{
+                                label: '品质评分',
+                                data: [85, 78, 92, 88],
+                                backgroundColor: ['#4caf50', '#ffc107', '#4caf50', '#4caf50'],
+                                borderRadius: 8
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            indexAxis: 'y',
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                x: { min: 0, max: 100 }
+                            }
+                        }
+                    });
+                    console.log('qualityBar chart initialized');
+                } catch (e) {
+                    console.error('Error initializing qualityBar:', e);
+                }
             }
-            if (document.getElementById('qualityBar')) {
-                self.charts.initQualityBarChart('qualityBar', self.charts.createMockData().barData);
+            
+            var radarChart = document.getElementById('radarChart');
+            if (radarChart) {
+                console.log('Initializing radarChart');
+                try {
+                    if (self.charts.radarChart) {
+                        self.charts.radarChart.destroy();
+                    }
+                    self.charts.radarChart = new Chart(radarChart, {
+                        type: 'radar',
+                        data: {
+                            labels: ['绿色占比', '纹理特征', '形态指标', '光谱特征', '综合评分'],
+                            datasets: [{
+                                label: '检测结果',
+                                data: [82, 75, 88, 78, 85],
+                                backgroundColor: 'rgba(46, 125, 50, 0.2)',
+                                borderColor: '#2e7d32',
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                r: { beginAtZero: true, max: 100 }
+                            }
+                        }
+                    });
+                    console.log('radarChart initialized');
+                } catch (e) {
+                    console.error('Error initializing radarChart:', e);
+                }
             }
-            if (document.getElementById('resultRadar')) {
-                self.charts.initRadarChart('resultRadar', {
-                    labels: ['绿色占比', '纹理特征', '形态指标', '光谱特征', '综合评分'],
-                    values: [82, 75, 88, 78, 85]
-                });
+            
+            var resultRadar = document.getElementById('resultRadar');
+            if (resultRadar) {
+                console.log('Initializing resultRadar');
+                try {
+                    if (self.charts.resultRadar) {
+                        self.charts.resultRadar.destroy();
+                    }
+                    self.charts.resultRadar = new Chart(resultRadar, {
+                        type: 'radar',
+                        data: {
+                            labels: ['绿色占比', '纹理特征', '形态指标', '光谱特征', '综合评分'],
+                            datasets: [{
+                                label: '检测结果',
+                                data: [82, 75, 88, 78, 85],
+                                backgroundColor: 'rgba(46, 125, 50, 0.2)',
+                                borderColor: '#2e7d32',
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                r: { beginAtZero: true, max: 100 }
+                            }
+                        }
+                    });
+                    console.log('resultRadar initialized');
+                } catch (e) {
+                    console.error('Error initializing resultRadar:', e);
+                }
             }
         }, 300);
     }
@@ -1214,10 +1417,25 @@ class PageManager {
     }
 
     hideLoading() {
-        var loadingOverlay = document.querySelector('.loading-overlay');
-        if (loadingOverlay) {
-            loadingOverlay.remove();
-        }
+        console.log('hideLoading called');
+        var loadingOverlays = document.querySelectorAll('.loading-overlay');
+        console.log('Found loading overlays:', loadingOverlays.length);
+        
+        loadingOverlays.forEach(function(overlay) {
+            console.log('Removing loading overlay:', overlay);
+            try {
+                overlay.remove();
+                console.log('Loading overlay removed successfully');
+            } catch (e) {
+                console.error('Error removing loading overlay:', e);
+                overlay.style.display = 'none';
+            }
+        });
+        
+        var spinners = document.querySelectorAll('.spinner-container, .loading-spinner');
+        spinners.forEach(function(spinner) {
+            spinner.style.display = 'none';
+        });
     }
 
     showToast(message, type) {

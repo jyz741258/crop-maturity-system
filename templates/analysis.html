@@ -109,5 +109,21 @@
     </div>
 
     <script src="/static/js/page.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var selectedCrop = sessionStorage.getItem('selectedCrop');
+            if (selectedCrop) {
+                var cropChips = document.querySelectorAll('.crop-selector .crop-chip');
+                cropChips.forEach(function(chip) {
+                    chip.classList.remove('active');
+                    if (chip.dataset.crop === selectedCrop) {
+                        chip.classList.add('active');
+                    }
+                });
+                
+                sessionStorage.removeItem('selectedCrop');
+            }
+        });
+    </script>
 </body>
 </html>

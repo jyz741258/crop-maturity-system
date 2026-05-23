@@ -49,6 +49,11 @@ class PageManager {
                     c.classList.remove('active');
                 });
                 chip.classList.add('active');
+                
+                var cropType = chip.dataset.crop;
+                sessionStorage.setItem('selectedCrop', cropType);
+                
+                self.loadPage('analysis');
             });
         });
 
@@ -90,6 +95,43 @@ class PageManager {
             }
         });
 
+        document.querySelectorAll('.dropdown-menu a').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (dropdown) dropdown.classList.remove('show');
+                
+                var href = link.getAttribute('href');
+                
+                if (href === '/logout') {
+                    self.handleLogout();
+                } else if (href === '#profile') {
+                    self.showProfile();
+                } else if (href === '#settings') {
+                    self.showSettings();
+                } else if (href === '#help-center') {
+                    self.loadPage('help');
+                }
+            });
+        });
+
+        var notificationBtn = document.getElementById('notificationBtn');
+        if (notificationBtn) {
+            notificationBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                self.showNotifications();
+            });
+        }
+
+        var searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.keyCode === 13) {
+                    e.preventDefault();
+                    self.handleSearch(searchInput.value.trim());
+                }
+            });
+        }
+
         document.querySelectorAll('.view-all').forEach(function(link) {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -123,6 +165,207 @@ class PageManager {
                 window.open('/region', '_blank');
                 break;
         }
+    }
+
+    handleLogout() {
+        if (confirm('确定要退出登录吗？')) {
+            fetch('/logout', {
+                method: 'POST',
+                credentials: 'include'
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    window.location.href = '/login';
+                }
+            })
+            .catch(function(error) {
+                console.error('Logout error:', error);
+                window.location.href = '/login';
+            });
+        }
+    }
+
+    showProfile() {
+        var profileModal = document.createElement('div');
+        profileModal.className = 'modal-overlay';
+        profileModal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-user"></i> 个人资料</h3>
+                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="profile-info">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="profile-details">
+                            <div class="detail-item">
+                                <label>用户名</label>
+                                <span>admin</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>角色</label>
+                                <span>系统管理员</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>邮箱</label>
+                                <span>admin@crop-system.com</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>创建时间</label>
+                                <span>2024-01-01</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">关闭</button>
+                    <button class="btn btn-primary">修改资料</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(profileModal);
+        profileModal.addEventListener('click', function(e) {
+            if (e.target === profileModal) {
+                profileModal.remove();
+            }
+        });
+    }
+
+    showSettings() {
+        var settingsModal = document.createElement('div');
+        settingsModal.className = 'modal-overlay';
+        settingsModal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-cog"></i> 系统设置</h3>
+                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-form">
+                        <div class="setting-section">
+                            <h4>界面设置</h4>
+                            <div class="setting-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" checked>
+                                    <span>启用深色模式</span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" checked>
+                                    <span>显示动画效果</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-section">
+                            <h4>分析设置</h4>
+                            <div class="setting-item">
+                                <label>默认检测精度</label>
+                                <select>
+                                    <option>高</option>
+                                    <option>中</option>
+                                    <option>低</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" checked>
+                                    <span>自动保存分析结果</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">取消</button>
+                    <button class="btn btn-primary">保存设置</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(settingsModal);
+        settingsModal.addEventListener('click', function(e) {
+            if (e.target === settingsModal) {
+                settingsModal.remove();
+            }
+        });
+    }
+
+    showNotifications() {
+        var notificationModal = document.createElement('div');
+        notificationModal.className = 'modal-overlay';
+        notificationModal.innerHTML = `
+            <div class="modal-content" style="max-width: 450px;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-bell"></i> 通知消息</h3>
+                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body" style="padding: 0;">
+                    <div class="notification-list">
+                        <div class="notification-item unread">
+                            <div class="notification-icon success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-title">分析任务完成</div>
+                                <div class="notification-desc">您的甜椒种植区图片分析已完成，成熟率 85%</div>
+                                <div class="notification-time">10分钟前</div>
+                            </div>
+                        </div>
+                        <div class="notification-item unread">
+                            <div class="notification-icon warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-title">作物成熟预警</div>
+                                <div class="notification-desc">番茄大棚检测显示部分作物已达最佳采收期</div>
+                                <div class="notification-time">30分钟前</div>
+                            </div>
+                        </div>
+                        <div class="notification-item">
+                            <div class="notification-icon info">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-title">系统更新</div>
+                                <div class="notification-desc">系统已更新至 v2.1.0，新增批量分析功能</div>
+                                <div class="notification-time">1小时前</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">全部已读</button>
+                    <button class="btn btn-primary" onclick="this.closest('.modal-overlay').remove()">关闭</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(notificationModal);
+        notificationModal.addEventListener('click', function(e) {
+            if (e.target === notificationModal) {
+                notificationModal.remove();
+            }
+        });
+    }
+
+    handleSearch(query) {
+        if (!query) {
+            this.showToast('请输入搜索关键词', 'info');
+            return;
+        }
+        
+        this.loadPage('history');
+        
+        setTimeout(function() {
+            var searchInput = document.querySelector('.search-box-container input');
+            if (searchInput) {
+                searchInput.value = query;
+                searchInput.dispatchEvent(new Event('input'));
+            }
+        }, 500);
+        
+        this.showToast('正在搜索: ' + query, 'info');
     }
 
     loadPage(pageName) {

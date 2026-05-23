@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI - ?/title>
+    <title>AI 助手 - 作物成熟度检测系统</title>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <style>
         * {
@@ -294,11 +293,11 @@
     <div class="chat-container">
         <div class="chat-header">
             <button class="back-btn" onclick="goBack()">
-                <i class="fa fa-arrow-left"></i> 
+                <i class="fa fa-arrow-left"></i> 返回
             </button>
             <div class="header-title">
-                <h2><i class="fa fa-robot"></i> AI</h2>
-                <p></p>
+                <h2><i class="fa fa-robot"></i> AI 助手</h2>
+                <p>有什么可以帮助您的？</p>
             </div>
         </div>
 
@@ -307,32 +306,28 @@
                 <div class="message-content">
                     <div class="bot-avatar"><i class="fa fa-leaf"></i></div>
                     <div class="bot-text">
-                        AI
+                        您好！我是作物成熟度检测系统的AI助手。我可以帮助您了解系统功能、使用方法以及成熟度判定标准等问题。请问有什么可以帮助您的？
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="quick-questions">
-            <p></p>
+            <p>快速问题：</p>
             <div class="tags">
-                <span class="tag" onclick="sendMessage('')"></span>
-                <span class="tag" onclick="sendMessage('?)"></span>
-                <span class="tag" onclick="sendMessage('?)"></span>
-                <span class="tag" onclick="sendMessage('?)"></span>
-                <span class="tag" onclick="sendMessage('?)"></span>
-                <span class="tag" onclick="sendMessage('?)"></span>
-                <span class="tag" onclick="sendMessage('?)"></span>
-                <span class="tag" onclick="sendMessage('?)"></span>
-                <span class="tag" onclick="sendMessage('?)"></span>
-                <span class="tag" onclick="sendMessage('')"></span>
-                <span class="tag" onclick="sendMessage('')"></span>
-                <span class="tag" onclick="sendMessage('')"></span>
+                <span class="tag" onclick="sendMessage('系统功能有哪些？')">系统功能</span>
+                <span class="tag" onclick="sendMessage('如何上传图片？')">上传图片</span>
+                <span class="tag" onclick="sendMessage('如何下载报告？')">下载报告</span>
+                <span class="tag" onclick="sendMessage('支持哪些作物？')">支持作物</span>
+                <span class="tag" onclick="sendMessage('批量分析怎么用？')">批量分析</span>
+                <span class="tag" onclick="sendMessage('结果如何解读？')">结果解读</span>
+                <span class="tag" onclick="sendMessage('视频分析功能')">视频分析</span>
+                <span class="tag" onclick="sendMessage('历史记录管理')">历史记录</span>
             </div>
         </div>
 
         <div class="chat-input">
-            <input type="text" id="userInput" placeholder="..." onkeydown="if(event.keyCode==13) sendMessage()">
+            <input type="text" id="userInput" placeholder="请输入您的问题..." onkeydown="if(event.keyCode==13) sendMessage()">
             <button onclick="sendMessage()"><i class="fa fa-paper-plane"></i></button>
         </div>
     </div>
@@ -344,18 +339,18 @@
 
         function parseAnswer(answer) {
             var pageMap = {
-                '': '/analysis',
-                '': '/batch',
-                '?: '/dashboard',
-                '': '/history',
-                '?: '/crops',
-                '': '/help',
-                'AI': '/ai'
+                '分析页面': '/analysis',
+                '批量分析': '/batch',
+                '仪表盘': '/dashboard',
+                '历史记录': '/history',
+                '作物库': '/crops',
+                '帮助页面': '/help',
+                'AI助手': '/ai'
             };
 
             var parsed = answer;
 
-            parsed = parsed.replace(/\[:([^\]]+)\]([^\[]+)\[\/\]/g, function(match, pageName, linkText) {
+            parsed = parsed.replace(/\[跳转:([^\]]+)\]([^\[]+)\[\/跳转\]/g, function(match, pageName, linkText) {
                 var url = pageMap[pageName.trim()];
                 if (url) {
                     return '<a href="' + url + '" class="jump-link" target="_top">' + linkText.trim() + '</a>';
@@ -363,7 +358,7 @@
                 return match;
             });
 
-            parsed = parsed.replace(/\[:([^\]]+)\]/g, function(match, pageName) {
+            parsed = parsed.replace(/\[跳转:([^\]]+)\]/g, function(match, pageName) {
                 var url = pageMap[pageName.trim()];
                 if (url) {
                     return '<a href="' + url + '" class="jump-link" target="_top">' + pageName + '</a>';
@@ -430,7 +425,7 @@
                 errorMessage.innerHTML = `
                     <div class="message-content">
                         <div class="bot-avatar"><i class="fa fa-leaf"></i></div>
-                        <div class="bot-text"></div>
+                        <div class="bot-text">抱歉，出现了一些问题，请稍后重试。</div>
                     </div>
                 `;
                 chatMessages.appendChild(errorMessage);

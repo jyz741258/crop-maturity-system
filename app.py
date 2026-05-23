@@ -215,7 +215,8 @@ def analyze_region():
         
         heatmap_image = heatmap_gen.generate_maturity_heatmap(image, detections, grid_size)
         grid_image = heatmap_gen.draw_region_grid(image, grid_size)
-        labeled_image = heatmap_gen.draw_region_labels(heatmap_image, heatmap_gen._analyze_regions(image, detections, grid_size))
+        regions = heatmap_gen._analyze_regions(image, detections, grid_size)
+        labeled_image = heatmap_gen.draw_region_labels(heatmap_image, regions)
         
         heatmap_path = os.path.join(app.config['OUTPUT_FOLDER'], f'heatmap_{datetime.now().strftime("%Y%m%d_%H%M%S")}.jpg')
         labeled_path = os.path.join(app.config['OUTPUT_FOLDER'], f'labeled_{datetime.now().strftime("%Y%m%d_%H%M%S")}.jpg')

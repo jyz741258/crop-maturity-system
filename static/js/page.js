@@ -65,17 +65,16 @@ class PageManager {
             });
         });
 
-        var toggleBtn = document.getElementById('sidebarToggle');
-        var sidebar = document.getElementById('sidebar');
-        var mainContent = document.getElementById('mainContent');
-
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', function() {
-                self.sidebarCollapsed = !self.sidebarCollapsed;
-                if (sidebar) sidebar.classList.toggle('collapsed', self.sidebarCollapsed);
-                if (mainContent) mainContent.classList.toggle('sidebar-collapsed', self.sidebarCollapsed);
-            });
-        }
+        // 侧边栏切换 - 使用事件委托确保始终生效
+        document.addEventListener('click', function(e) {
+            var toggleBtn = e.target.closest('#sidebarToggle');
+            if (toggleBtn) {
+                var sidebar = document.getElementById('sidebar');
+                var mainContent = document.getElementById('mainContent');
+                if (sidebar) sidebar.classList.toggle('collapsed');
+                if (mainContent) mainContent.classList.toggle('sidebar-collapsed');
+            }
+        });
 
         var themeToggle = document.getElementById('themeToggle');
         if (themeToggle) {
@@ -329,7 +328,7 @@ class PageManager {
             <div class="modal-content" style="max-width: 450px;">
                 <div class="modal-header">
                     <h3><i class="fas fa-bell"></i> 通知消息</h3>
-                    <button class="modal-close" id="closeNotificationBtn"><i class="fas fa-times"></i></button>
+                    <button class="modal-close"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="modal-body" style="padding: 0;">
                     <div class="notification-list">
@@ -366,39 +365,34 @@ class PageManager {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" id="markAllReadBtn">全部已读</button>
-                    <button class="btn btn-primary" id="closeNotificationModalBtn">关闭</button>
+                    <button class="btn btn-secondary">全部已读</button>
+                    <button class="btn btn-primary">关闭</button>
                 </div>
             </div>
         `;
         document.body.appendChild(notificationModal);
         
-        var self = this;
+        // 直接在按钮上绑定点击事件，使用onclick
+        var closeBtn = notificationModal.querySelector('.modal-close');
+        var allBtn = notificationModal.querySelectorAll('.modal-footer .btn');
         
-        document.getElementById('closeNotificationBtn').addEventListener('click', function() {
-            self.closeNotificationModal();
-        });
-        
-        document.getElementById('markAllReadBtn').addEventListener('click', function() {
-            self.closeNotificationModal();
-        });
-        
-        document.getElementById('closeNotificationModalBtn').addEventListener('click', function() {
-            self.closeNotificationModal();
-        });
-        
-        notificationModal.addEventListener('click', function(e) {
-            if (e.target === notificationModal) {
-                self.closeNotificationModal();
-            }
-        });
-    }
-    
-    closeNotificationModal() {
-        var modal = document.getElementById('notificationModal');
-        if (modal) {
-            modal.remove();
+        if (closeBtn) {
+            closeBtn.onclick = function() {
+                notificationModal.remove();
+            };
         }
+        
+        allBtn.forEach(function(btn) {
+            btn.onclick = function() {
+                notificationModal.remove();
+            };
+        });
+        
+        notificationModal.onclick = function(e) {
+            if (e.target === notificationModal) {
+                notificationModal.remove();
+            }
+        };
     }
 
     handleSearch(query) {

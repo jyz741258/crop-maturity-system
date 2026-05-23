@@ -79,12 +79,30 @@ class PageManager {
 
         var themeToggle = document.getElementById('themeToggle');
         if (themeToggle) {
+            // 检查本地存储的主题设置
+            var savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                var icon = themeToggle.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            }
+            
             themeToggle.addEventListener('click', function() {
                 document.body.classList.toggle('dark-mode');
                 var icon = themeToggle.querySelector('i');
                 if (icon) {
                     icon.classList.toggle('fa-moon');
                     icon.classList.toggle('fa-sun');
+                }
+                
+                // 保存主题设置到本地存储
+                if (document.body.classList.contains('dark-mode')) {
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    localStorage.setItem('theme', 'light');
                 }
             });
         }
@@ -303,11 +321,12 @@ class PageManager {
     showNotifications() {
         var notificationModal = document.createElement('div');
         notificationModal.className = 'modal-overlay';
+        notificationModal.id = 'notificationModal';
         notificationModal.innerHTML = `
             <div class="modal-content" style="max-width: 450px;">
                 <div class="modal-header">
                     <h3><i class="fas fa-bell"></i> 通知消息</h3>
-                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()"><i class="fas fa-times"></i></button>
+                    <button class="modal-close" id="closeNotificationBtn"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="modal-body" style="padding: 0;">
                     <div class="notification-list">
@@ -344,17 +363,39 @@ class PageManager {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">全部已读</button>
-                    <button class="btn btn-primary" onclick="this.closest('.modal-overlay').remove()">关闭</button>
+                    <button class="btn btn-secondary" id="markAllReadBtn">全部已读</button>
+                    <button class="btn btn-primary" id="closeNotificationModalBtn">关闭</button>
                 </div>
             </div>
         `;
         document.body.appendChild(notificationModal);
+        
+        var self = this;
+        
+        document.getElementById('closeNotificationBtn').addEventListener('click', function() {
+            self.closeNotificationModal();
+        });
+        
+        document.getElementById('markAllReadBtn').addEventListener('click', function() {
+            self.closeNotificationModal();
+        });
+        
+        document.getElementById('closeNotificationModalBtn').addEventListener('click', function() {
+            self.closeNotificationModal();
+        });
+        
         notificationModal.addEventListener('click', function(e) {
             if (e.target === notificationModal) {
-                notificationModal.remove();
+                self.closeNotificationModal();
             }
         });
+    }
+    
+    closeNotificationModal() {
+        var modal = document.getElementById('notificationModal');
+        if (modal) {
+            modal.remove();
+        }
     }
 
     handleSearch(query) {

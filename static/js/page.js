@@ -188,7 +188,10 @@ class PageManager {
                 window.open('/ai', '_blank');
                 break;
             case 'region-analysis':
-                window.open('/region', '_blank');
+                this.loadPage('region');
+                break;
+            case 'compare-analysis':
+                this.loadPage('compare');
                 break;
         }
     }

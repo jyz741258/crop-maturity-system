@@ -108,6 +108,16 @@ def batch():
 def history():
     return render_template('history.html', username=session.get('name'))
 
+@app.route('/region')
+@login_required
+def region():
+    return render_template('region.html', username=session.get('name'))
+
+@app.route('/compare')
+@login_required
+def compare():
+    return render_template('compare.html', username=session.get('name'))
+
 @app.route('/crops')
 @login_required
 def crops():

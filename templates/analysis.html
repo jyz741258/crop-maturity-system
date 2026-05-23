@@ -291,6 +291,16 @@
                 if (data.success) {
                     currentAnalysisData = data.detections;
                     displayResults(data);
+                    
+                    // 保存到历史记录
+                    saveToHistory({
+                        image: previewImage.src,
+                        crop_type: currentCropType,
+                        detections: data.detections,
+                        summary: data.summary
+                    });
+                    
+                    showToast('分析完成！检测到 ' + (data.summary.total_count || 0) + ' 个目标', 'success');
                 } else {
                     alert(data.error || '分析失败');
                 }
@@ -300,6 +310,56 @@
                 analyzeBtn.disabled = false;
                 alert('分析失败: ' + error.message);
             });
+        }
+        
+        function saveToHistory(data) {
+            var history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+            var record = {
+                id: 'REC-' + Date.now(),
+                timestamp: new Date().toISOString(),
+                image: data.image,
+                crop_type: data.crop_type,
+                crop_name: getCropName(data.crop_type),
+                total_count: data.summary.total_count || 0,
+                mature_rate: data.summary.mature_rate || 0,
+                avg_confidence: data.summary.avg_confidence || 0,
+                avg_quality: data.summary.avg_quality || 0,
+                detections: data.detections,
+                summary: data.summary
+            };
+            history.unshift(record);
+            if (history.length > 100) {
+                history = history.slice(0, 100);
+            }
+            localStorage.setItem('analysisHistory', JSON.stringify(history));
+        }
+        
+        function getCropName(cropType) {
+            var names = {
+                'Pepper__bell': '甜椒',
+                'Potato': '土豆',
+                'Tomato': '番茄',
+                'Lychee': '荔枝',
+                'Tea': '茶叶',
+                'Tobacco': '烟叶'
+            };
+            return names[cropType] || cropType;
+        }
+        
+        function showToast(message, type) {
+            var toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
+            toast.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle') + '"></i><span>' + message + '</span>';
+            document.body.appendChild(toast);
+            setTimeout(function() {
+                toast.classList.add('show');
+            }, 10);
+            setTimeout(function() {
+                toast.classList.remove('show');
+                setTimeout(function() {
+                    toast.remove();
+                }, 300);
+            }, 3000);
         }
 
         function dataURLtoBlob(dataURL) {

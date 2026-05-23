@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作物成熟度分析系统 - 对比分析</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    <link rel="stylesheet" href="/static/css/animations.css">
+    <style>
+        .compare-container {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+        }
+        
+        .compare-main {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        
+        .compare-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .compare-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        .compare-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .compare-card .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .compare-card .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .compare-card .crop-badge {
+            padding: 4px 12px;
+            background: var(--bg-light);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .compare-card .remove-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        
+        .compare-card .remove-btn:hover {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .compare-card .card-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            background: var(--bg-light);
+        }
+        
+        .compare-card .card-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .compare-card .stat-item {
+            background: var(--bg-light);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .compare-card .stat-item .value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .compare-card .stat-item .label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        .compare-chart-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+        
+        .compare-chart-section h3 {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .compare-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        
+        .compare-action-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+        
+        .compare-action-card h3 {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .action-btn-large {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            transition: var(--transition);
+        }
+        
+        .action-btn-large.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .action-btn-large.primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .action-btn-large.secondary {
+            background: var(--bg-light);
+            color: var(--text-primary);
+        }
+        
+        .action-btn-large.secondary:hover {
+            background: var(--border-color);
+        }
+        
+        .compare-summary {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+        
+        .compare-summary h3 {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-item .label {
+            color: var(--text-secondary);
+        }
+        
+        .summary-item .value {
+            font-weight: 600;
+        }
+        
+        .summary-item .best {
+            color: var(--success-color);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+        
+        @media (max-width: 1200px) {
+            .compare-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .compare-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .compare-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="app-container">
+        {% include 'sidebar.html' %}
+        
+        <main class="main-content" id="mainContent">
+            <div class="page-header animate-fade-in">
+                <h1>对比分析</h1>
+                <p>选择多条历史记录进行对比分析</p>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="addFromHistoryBtn"><i class="fas fa-plus"></i> 从历史记录添加</button>
+                    <button class="btn btn-primary" id="exportCompareBtn"><i class="fas fa-download"></i> 导出对比报告</button>
+                </div>
+            </div>
+
+            <div class="compare-container">
+                <div class="compare-main">
+                    <div id="compareCardsContainer" class="compare-cards">
+                        <div class="empty-state">
+                            <i class="fas fa-balance-scale"></i>
+                            <h3>暂无对比数据</h3>
+                            <p>从历史记录中选择记录进行对比分析</p>
+                        </div>
+                    </div>
+
+                    <div class="compare-chart-section animate-fade-in" style="animation-delay: 0.2s" id="compareChartSection" style="display: none;">
+                        <h3><i class="fas fa-chart-bar"></i> 成熟率对比</h3>
+                        <div class="chart-container" style="height: 300px;">
+                            <canvas id="compareChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="compare-chart-section animate-fade-in" style="animation-delay: 0.3s" id="compareDistributionSection" style="display: none;">
+                        <h3><i class="fas fa-chart-pie"></i> 成熟度分布对比</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                            <div class="chart-container" style="height: 200px;">
+                                <canvas id="distChart1"></canvas>
+                            </div>
+                            <div class="chart-container" style="height: 200px;">
+                                <canvas id="distChart2"></canvas>
+                            </div>
+                            <div class="chart-container" style="height: 200px;">
+                                <canvas id="distChart3"></canvas>
+                            </div>
+                            <div class="chart-container" style="height: 200px;">
+                                <canvas id="distChart4"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="compare-sidebar">
+                    <div class="compare-action-card animate-fade-in" style="animation-delay: 0.1s">
+                        <h3><i class="fas fa-cog"></i> 操作</h3>
+                        <button class="action-btn-large secondary" id="clearAllBtn">
+                            <i class="fas fa-trash"></i> 清空对比列表
+                        </button>
+                        <button class="action-btn-large primary" id="startCompareBtn">
+                            <i class="fas fa-chart-line"></i> 生成对比图表
+                        </button>
+                    </div>
+
+                    <div class="compare-summary animate-fade-in" style="animation-delay: 0.2s" id="compareSummary">
+                        <h3><i class="fas fa-star"></i> 对比摘要</h3>
+                        <div class="summary-item">
+                            <span class="label">对比记录数</span>
+                            <span class="value" id="summaryCount">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">最高成熟率</span>
+                            <span class="value best" id="summaryBest">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">平均成熟率</span>
+                            <span class="value" id="summaryAvg">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">平均品质</span>
+                            <span class="value" id="summaryQuality">-</span>
+                        </div>
+                    </div>
+
+                    <div class="compare-action-card animate-fade-in" style="animation-delay: 0.3s">
+                        <h3><i class="fas fa-lightbulb"></i> 分析建议</h3>
+                        <div id="compareSuggestions" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+                            <p style="margin-bottom: 10px;">💡 选择多条记录后，系统会自动生成对比分析报告。</p>
+                            <p>建议选择相同作物类型的记录进行对比，以获得更准确的分析结果。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/page.js"></script>
+    <script>
+        var compareRecords = [];
+        var compareChart = null;
+        var distCharts = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCompareRecords();
+            
+            document.getElementById('addFromHistoryBtn').addEventListener('click', showHistorySelector);
+            document.getElementById('clearAllBtn').addEventListener('click', clearAllRecords);
+            document.getElementById('startCompareBtn').addEventListener('click', generateCompareCharts);
+            document.getElementById('exportCompareBtn').addEventListener('click', exportCompareReport);
+        });
+        
+        function loadCompareRecords() {
+            var selected = JSON.parse(sessionStorage.getItem('compareRecords') || '[]');
+            var history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+            
+            compareRecords = history.filter(function(record) {
+                return selected.includes(record.id);
+            });
+            
+            renderCompareCards();
+            updateSummary();
+        }
+        
+        function renderCompareCards() {
+            var container = document.getElementById('compareCardsContainer');
+            
+            if (compareRecords.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <i class="fas fa-balance-scale"></i>
+                        <h3>暂无对比数据</h3>
+                        <p>从历史记录中选择记录进行对比分析</p>
+                        <button class="btn btn-primary" style="margin-top: 20px;" onclick="showHistorySelector()">
+                            <i class="fas fa-plus"></i> 添加记录
+                        </button>
+                    </div>
+                `;
+                document.getElementById('compareChartSection').style.display = 'none';
+                document.getElementById('compareDistributionSection').style.display = 'none';
+                return;
+            }
+            
+            container.innerHTML = compareRecords.map(function(record, index) {
+                var date = new Date(record.timestamp);
+                var maturityDistribution = record.summary.maturity_distribution || {};
+                
+                return `
+                    <div class="compare-card">
+                        <button class="remove-btn" onclick="removeRecord('${record.id}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="card-header">
+                            <span class="card-title">
+                                <i class="fas fa-image"></i>
+                                ${record.id}
+                            </span>
+                            <span class="crop-badge">${record.crop_name}</span>
+                        </div>
+                        <img src="${record.image}" alt="缩略图" class="card-image">
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">
+                            ${date.toLocaleString('zh-CN')}
+                        </div>
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <div class="value">${record.mature_rate}%</div>
+                                <div class="label">成熟率</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="value">${record.total_count}</div>
+                                <div class="label">检测数</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="value">${record.avg_confidence}%</div>
+                                <div class="label">置信度</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="value">${record.avg_quality}</div>
+                                <div class="label">品质评分</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function removeRecord(id) {
+            compareRecords = compareRecords.filter(function(r) { return r.id !== id; });
+            
+            var selected = JSON.parse(sessionStorage.getItem('compareRecords') || '[]');
+            selected = selected.filter(function(s) { return s !== id; });
+            sessionStorage.setItem('compareRecords', JSON.stringify(selected));
+            
+            renderCompareCards();
+            updateSummary();
+            
+            if (compareRecords.length < 2) {
+                document.getElementById('compareChartSection').style.display = 'none';
+                document.getElementById('compareDistributionSection').style.display = 'none';
+            }
+        }
+        
+        function clearAllRecords() {
+            if (compareRecords.length === 0) return;
+            
+            if (!confirm('确定要清空所有对比记录吗？')) return;
+            
+            compareRecords = [];
+            sessionStorage.setItem('compareRecords', '[]');
+            renderCompareCards();
+            updateSummary();
+            document.getElementById('compareChartSection').style.display = 'none';
+            document.getElementById('compareDistributionSection').style.display = 'none';
+        }
+        
+        function updateSummary() {
+            document.getElementById('summaryCount').textContent = compareRecords.length;
+            
+            if (compareRecords.length === 0) {
+                document.getElementById('summaryBest').textContent = '-';
+                document.getElementById('summaryAvg').textContent = '-';
+                document.getElementById('summaryQuality').textContent = '-';
+                return;
+            }
+            
+            var rates = compareRecords.map(function(r) { return r.mature_rate; });
+            var best = Math.max.apply(null, rates);
+            var avg = rates.reduce(function(a, b) { return a + b; }, 0) / rates.length;
+            
+            var qualities = compareRecords.map(function(r) { return r.avg_quality; });
+            var avgQuality = qualities.reduce(function(a, b) { return a + b; }, 0) / qualities.length;
+            
+            document.getElementById('summaryBest').textContent = best + '%';
+            document.getElementById('summaryAvg').textContent = avg.toFixed(1) + '%';
+            document.getElementById('summaryQuality').textContent = avgQuality.toFixed(1);
+            
+            var suggestions = document.getElementById('compareSuggestions');
+            if (compareRecords.length >= 2) {
+                var bestRecord = compareRecords.find(function(r) { return r.mature_rate === best; });
+                suggestions.innerHTML = `
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: var(--success-color);">🏆 最佳表现</strong><br>
+                        ${bestRecord.crop_name} - ${bestRecord.id}<br>
+                        成熟率: ${best}%
+                    </div>
+                    <p>💡 建议参考最佳表现区域的管理方式，优化其他区域的种植策略。</p>
+                `;
+            } else {
+                suggestions.innerHTML = `
+                    <p style="margin-bottom: 10px;">💡 请至少选择2条记录进行对比分析。</p>
+                    <p>建议选择相同作物类型的记录进行对比，以获得更准确的分析结果。</p>
+                `;
+            }
+        }
+        
+        function showHistorySelector() {
+            var history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+            
+            if (history.length === 0) {
+                alert('暂无历史记录');
+                return;
+            }
+            
+            var modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 700px;">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-history"></i> 选择历史记录</h3>
+                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+                        <div class="table-container">
+                            <table class="detail-table">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox" id="selectAllCheck" onchange="toggleSelectAll()"></th>
+                                        <th>ID</th>
+                                        <th>作物类型</th>
+                                        <th>检测时间</th>
+                                        <th>成熟率</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${history.map(function(record) {
+                                        var selected = compareRecords.some(function(r) { return r.id === record.id; });
+                                        var date = new Date(record.timestamp);
+                                        return `
+                                            <tr>
+                                                <td><input type="checkbox" class="record-check" value="${record.id}" ${selected ? 'checked' : ''}></td>
+                                                <td>${record.id}</td>
+                                                <td>${record.crop_name}</td>
+                                                <td>${date.toLocaleDateString('zh-CN')}</td>
+                                                <td>${record.mature_rate}%</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">取消</button>
+                        <button class="btn btn-primary" onclick="confirmSelection()">确认选择</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        function toggleSelectAll() {
+            var checked = document.getElementById('selectAllCheck').checked;
+            document.querySelectorAll('.record-check').forEach(function(cb) {
+                cb.checked = checked;
+            });
+        }
+        
+        function confirmSelection() {
+            var selected = [];
+            document.querySelectorAll('.record-check:checked').forEach(function(cb) {
+                selected.push(cb.value);
+            });
+            
+            if (selected.length > 4) {
+                alert('最多只能选择4条记录进行对比');
+                return;
+            }
+            
+            var history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+            compareRecords = history.filter(function(record) {
+                return selected.includes(record.id);
+            });
+            
+            sessionStorage.setItem('compareRecords', JSON.stringify(selected));
+            renderCompareCards();
+            updateSummary();
+            
+            document.querySelector('.modal-overlay').remove();
+            
+            if (compareRecords.length >= 2) {
+                generateCompareCharts();
+            }
+        }
+        
+        function generateCompareCharts() {
+            if (compareRecords.length < 2) {
+                alert('请至少选择2条记录进行对比');
+                return;
+            }
+            
+            document.getElementById('compareChartSection').style.display = 'block';
+            document.getElementById('compareDistributionSection').style.display = 'block';
+            
+            setTimeout(function() {
+                initCompareChart();
+                initDistributionCharts();
+            }, 100);
+        }
+        
+        function initCompareChart() {
+            var ctx = document.getElementById('compareChart');
+            if (!ctx) return;
+            
+            if (compareChart) {
+                compareChart.destroy();
+            }
+            
+            var labels = compareRecords.map(function(r) { 
+                return r.crop_name + ' - ' + r.id.slice(-6); 
+            });
+            
+            compareChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '成熟率',
+                        data: compareRecords.map(function(r) { return r.mature_rate; }),
+                        backgroundColor: 'rgba(46, 125, 50, 0.8)',
+                        borderRadius: 8
+                    }, {
+                        label: '平均品质评分',
+                        data: compareRecords.map(function(r) { return r.avg_quality; }),
+                        backgroundColor: 'rgba(255, 193, 7, 0.8)',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+        }
+        
+        function initDistributionCharts() {
+            var colors = ['#4caf50', '#2196f3', '#ff9800', '#9c27b0'];
+            
+            for (var i = 0; i < Math.min(compareRecords.length, 4); i++) {
+                var record = compareRecords[i];
+                var ctx = document.getElementById('distChart' + (i + 1));
+                if (!ctx) continue;
+                
+                var dist = record.summary.maturity_distribution || {
+                    '幼嫩期': 0,
+                    '生长期': 0,
+                    '成熟期': 0,
+                    '过熟期': 0
+                };
+                
+                if (distCharts[i]) {
+                    distCharts[i].destroy();
+                }
+                
+                distCharts[i] = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['幼嫩期', '生长期', '成熟期', '过熟期'],
+                        datasets: [{
+                            data: [
+                                dist['幼嫩期'] || 0,
+                                dist['生长期'] || 0,
+                                dist['成熟期'] || 0,
+                                dist['过熟期'] || 0
+                            ],
+                            backgroundColor: ['#8bc34a', '#ffc107', '#4caf50', '#e53935'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: record.crop_name + ' - ' + record.id.slice(-6),
+                                font: { size: 12 }
+                            },
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+        }
+        
+        function exportCompareReport() {
+            if (compareRecords.length === 0) {
+                alert('暂无数据可导出');
+                return;
+            }
+            
+            var csv = '对比分析报告\n\n';
+            csv += '记录ID,作物类型,检测时间,检测总数,成熟率,平均置信度,平均品质评分\n';
+            
+            compareRecords.forEach(function(record) {
+                csv += `${record.id},${record.crop_name},${new Date(record.timestamp).toLocaleString('zh-CN')},${record.total_count},${record.mature_rate}%,${record.avg_confidence}%,${record.avg_quality}\n`;
+            });
+            
+            csv += '\n\n对比摘要:\n';
+            var rates = compareRecords.map(function(r) { return r.mature_rate; });
+            csv += `最高成熟率,${Math.max.apply(null, rates)}%\n`;
+            csv += `平均成熟率,${(rates.reduce(function(a, b) { return a + b; }, 0) / rates.length).toFixed(1)}%\n`;
+            var qualities = compareRecords.map(function(r) { return r.avg_quality; });
+            csv += `平均品质,${(qualities.reduce(function(a, b) { return a + b; }, 0) / qualities.length).toFixed(1)}\n`;
+            
+            var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'compare_report_' + new Date().toISOString().slice(0, 10) + '.csv';
+            link.click();
+        }
+    </script>
+</body>
+</html>

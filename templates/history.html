@@ -177,5 +177,340 @@
     </div>
 
     <script src="/static/js/page.js"></script>
-</body>
+    <script>
+        var currentFilter = {
+            cropType: 'all',
+            maturity: 'all',
+            status: 'all',
+            search: ''
+        };
+        var currentPage = 1;
+        var pageSize = 10;
+        var allHistory = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHistory();
+            setupFilters();
+            setupEventListeners();
+        });
+        
+        function loadHistory() {
+            allHistory = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+            updateStats();
+            filterAndRender();
+        }
+        
+        function updateStats() {
+            var total = allHistory.length;
+            var completed = allHistory.filter(function(r) { return r.total_count > 0; }).length;
+            var processing = 0;
+            var failed = 0;
+            
+            document.querySelector('.history-stats').innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-value">${total}</span>
+                    <span class="stat-label">总记录数</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">${completed}</span>
+                    <span class="stat-label">成功检测</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">${processing}</span>
+                    <span class="stat-label">处理中</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">${failed}</span>
+                    <span class="stat-label">检测失败</span>
+                </div>
+            `;
+        }
+        
+        function filterAndRender() {
+            var filtered = allHistory.filter(function(record) {
+                if (currentFilter.cropType !== 'all' && record.crop_name !== currentFilter.cropType) {
+                    return false;
+                }
+                if (currentFilter.search) {
+                    var searchLower = currentFilter.search.toLowerCase();
+                    var matchId = record.id.toLowerCase().includes(searchLower);
+                    var matchCrop = (record.crop_name || '').toLowerCase().includes(searchLower);
+                    if (!matchId && !matchCrop) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+            
+            renderTable(filtered);
+        }
+        
+        function renderTable(data) {
+            var start = (currentPage - 1) * pageSize;
+            var end = start + pageSize;
+            var pageData = data.slice(start, end);
+            
+            var tbody = document.getElementById('historyTableBody');
+            
+            if (pageData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                            <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                            <p>暂无历史记录</p>
+                        </td>
+                    </tr>
+                `;
+                document.querySelector('.pagination').style.display = 'none';
+                return;
+            }
+            
+            document.querySelector('.pagination').style.display = 'flex';
+            
+            tbody.innerHTML = pageData.map(function(record, index) {
+                var date = new Date(record.timestamp);
+                var timeStr = date.toLocaleString('zh-CN');
+                var rateClass = record.mature_rate >= 80 ? 'high' : record.mature_rate >= 60 ? 'medium' : 'low';
+                
+                return `
+                    <tr class="animate-fade-in" style="animation-delay: ${index * 0.05}s">
+                        <td>${record.id}</td>
+                        <td class="file-name-cell">
+                            <img src="${record.image}" alt="缩略图" class="record-thumbnail">
+                            ${record.crop_name}_${date.getDate()}
+                        </td>
+                        <td>${record.crop_name}</td>
+                        <td>${timeStr}</td>
+                        <td><span class="rate-badge ${rateClass}">${record.mature_rate}%</span></td>
+                        <td><span class="status-badge completed">完成</span></td>
+                        <td>
+                            <button class="action-btn view-btn" title="查看" onclick="viewRecord('${record.id}')"><i class="fas fa-eye"></i></button>
+                            <button class="action-btn download-btn" title="下载" onclick="downloadRecord('${record.id}')"><i class="fas fa-download"></i></button>
+                            <button class="action-btn delete-btn" title="删除" onclick="deleteRecord('${record.id}')"><i class="fas fa-trash"></i></button>
+                            <button class="action-btn compare-btn" title="对比" onclick="compareRecord('${record.id}')"><i class="fas fa-balance-scale"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            renderPagination(data.length);
+        }
+        
+        function renderPagination(total) {
+            var totalPages = Math.ceil(total / pageSize);
+            var pagination = document.querySelector('.pagination');
+            
+            var pages = [];
+            for (var i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    pages.push(i);
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    pages.push('...');
+                }
+            }
+            
+            pagination.innerHTML = `
+                <button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                ${pages.map(function(p) {
+                    if (p === '...') {
+                        return '<span class="pagination-ellipsis">...</span>';
+                    }
+                    return `<button class="pagination-btn ${p === currentPage ? 'active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+                }).join('')}
+                <button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            `;
+        }
+        
+        function goToPage(page) {
+            var totalPages = Math.ceil(allHistory.length / pageSize);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            filterAndRender();
+        }
+        
+        function setupFilters() {
+            var filterSelects = document.querySelectorAll('.filter-select');
+            filterSelects[0].addEventListener('change', function(e) {
+                currentFilter.cropType = e.target.value;
+                currentPage = 1;
+                filterAndRender();
+            });
+            filterSelects[1].addEventListener('change', function(e) {
+                currentFilter.maturity = e.target.value;
+                currentPage = 1;
+                filterAndRender();
+            });
+            filterSelects[2].addEventListener('change', function(e) {
+                currentFilter.status = e.target.value;
+                currentPage = 1;
+                filterAndRender();
+            });
+            
+            var searchInput = document.querySelector('.search-box-container input');
+            searchInput.addEventListener('input', function(e) {
+                currentFilter.search = e.target.value;
+                currentPage = 1;
+                filterAndRender();
+            });
+        }
+        
+        function setupEventListeners() {
+            document.getElementById('exportHistoryBtn').addEventListener('click', exportHistory);
+        }
+        
+        function viewRecord(id) {
+            var record = allHistory.find(function(r) { return r.id === id; });
+            if (!record) return;
+            
+            var modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 900px;">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-eye"></i> 记录详情 - ${id}</h3>
+                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>作物类型</label>
+                                <span>${record.crop_name}</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>检测时间</label>
+                                <span>${new Date(record.timestamp).toLocaleString('zh-CN')}</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>检测总数</label>
+                                <span>${record.total_count}</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>成熟率</label>
+                                <span>${record.mature_rate}%</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>平均置信度</label>
+                                <span>${record.avg_confidence}%</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>平均品质评分</label>
+                                <span>${record.avg_quality}</span>
+                            </div>
+                        </div>
+                        <h4 style="margin: 20px 0 10px;">检测详情</h4>
+                        <div class="table-container" style="max-height: 300px; overflow-y: auto;">
+                            <table class="detail-table">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>成熟度</th>
+                                        <th>置信度</th>
+                                        <th>绿色占比</th>
+                                        <th>品质评分</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${(record.detections || []).map(function(d, i) {
+                                        return `
+                                            <tr>
+                                                <td>${i + 1}</td>
+                                                <td><span class="maturity-badge">${d.maturity || '未知'}</span></td>
+                                                <td>${d.confidence || 0}%</td>
+                                                <td>${((d.green_ratio || 0) * 100).toFixed(1)}%</td>
+                                                <td>${d.quality_score || 0}</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        function downloadRecord(id) {
+            var record = allHistory.find(function(r) { return r.id === id; });
+            if (!record) return;
+            
+            var csv = 'ID,作物类型,检测时间,检测总数,成熟率,平均置信度,平均品质评分\n';
+            csv += `${record.id},${record.crop_name},${new Date(record.timestamp).toLocaleString('zh-CN')},${record.total_count},${record.mature_rate}%,${record.avg_confidence}%,${record.avg_quality}\n\n`;
+            csv += '序号,成熟度,置信度,绿色占比,品质评分\n';
+            (record.detections || []).forEach(function(d, i) {
+                csv += `${i + 1},${d.maturity || '未知'},${d.confidence || 0}%,${((d.green_ratio || 0) * 100).toFixed(1)}%,${d.quality_score || 0}\n`;
+            });
+            
+            var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = id + '_report.csv';
+            link.click();
+        }
+        
+        function deleteRecord(id) {
+            if (!confirm('确定要删除这条记录吗？')) return;
+            
+            allHistory = allHistory.filter(function(r) { return r.id !== id; });
+            localStorage.setItem('analysisHistory', JSON.stringify(allHistory));
+            updateStats();
+            filterAndRender();
+            
+            var toast = document.createElement('div');
+            toast.className = 'toast toast-success';
+            toast.innerHTML = '<i class="fas fa-check-circle"></i><span>记录已删除</span>';
+            document.body.appendChild(toast);
+            setTimeout(function() { toast.classList.add('show'); }, 10);
+            setTimeout(function() { 
+                toast.classList.remove('show');
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 2000);
+        }
+        
+        function compareRecord(id) {
+            var selectedRecords = JSON.parse(sessionStorage.getItem('compareRecords') || '[]');
+            if (selectedRecords.length >= 4) {
+                alert('最多只能选择4条记录进行对比');
+                return;
+            }
+            if (selectedRecords.includes(id)) {
+                alert('该记录已在对比列表中');
+                return;
+            }
+            selectedRecords.push(id);
+            sessionStorage.setItem('compareRecords', JSON.stringify(selectedRecords));
+            
+            var toast = document.createElement('div');
+            toast.className = 'toast toast-info';
+            toast.innerHTML = '<i class="fas fa-info-circle"></i><span>已添加到对比列表（' + selectedRecords.length + '/4）</span>';
+            document.body.appendChild(toast);
+            setTimeout(function() { toast.classList.add('show'); }, 10);
+            setTimeout(function() { 
+                toast.classList.remove('show');
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 2000);
+        }
+        
+        function exportHistory() {
+            if (allHistory.length === 0) {
+                alert('暂无记录可导出');
+                return;
+            }
+            
+            var csv = 'ID,作物类型,检测时间,检测总数,成熟率,平均置信度,平均品质评分\n';
+            allHistory.forEach(function(record) {
+                csv += `${record.id},${record.crop_name},${new Date(record.timestamp).toLocaleString('zh-CN')},${record.total_count},${record.mature_rate}%,${record.avg_confidence}%,${record.avg_quality}\n`;
+            });
+            
+            var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'analysis_history_' + new Date().toISOString().slice(0, 10) + '.csv';
+            link.click();
+        }
+    </script>
 </html>

@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作物成熟度分析系统 - 区域分析</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    <link rel="stylesheet" href="/static/css/animations.css">
+    <style>
+        .region-container {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 24px;
+        }
+        
+        .region-map {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+        
+        .map-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .map-legend {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+        
+        .region-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .region-block {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            position: relative;
+        }
+        
+        .region-block:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .region-block.active {
+            border-color: var(--primary-color);
+        }
+        
+        .region-block .region-name {
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .region-block .region-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        
+        .region-block .region-stat {
+            text-align: center;
+            padding: 8px;
+            background: var(--bg-card);
+            border-radius: 8px;
+        }
+        
+        .region-block .region-stat .value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .region-block .region-stat .label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .region-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .region-status.good {
+            background: rgba(39, 174, 96, 0.15);
+            color: #27ae60;
+        }
+        
+        .region-status.warning {
+            background: rgba(243, 156, 18, 0.15);
+            color: #f39c12;
+        }
+        
+        .region-status.danger {
+            background: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+        }
+        
+        .region-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        
+        .region-detail-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+        
+        .region-detail-card h3 {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .crop-distribution-chart {
+            margin-top: 20px;
+        }
+        
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .quick-stat {
+            background: var(--bg-light);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .quick-stat .icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+        
+        .quick-stat .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .quick-stat .label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .add-region-btn {
+            width: 100%;
+            padding: 16px;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1rem;
+        }
+        
+        .add-region-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: rgba(46, 125, 50, 0.05);
+        }
+        
+        @media (max-width: 1200px) {
+            .region-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .region-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .region-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="app-container">
+        {% include 'sidebar.html' %}
+        
+        <main class="main-content" id="mainContent">
+            <div class="page-header animate-fade-in">
+                <h1>区域分析</h1>
+                <p>管理和分析不同地块的作物成熟度</p>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="refreshMapBtn"><i class="fas fa-sync-alt"></i> 刷新数据</button>
+                    <button class="btn btn-primary" id="exportRegionBtn"><i class="fas fa-download"></i> 导出报告</button>
+                </div>
+            </div>
+
+            <div class="region-container">
+                <div class="region-map animate-fade-in" style="animation-delay: 0.1s">
+                    <div class="map-header">
+                        <h3><i class="fas fa-map-marked-alt"></i> 地块分布图</h3>
+                        <div class="map-legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #27ae60;"></div>
+                                <span>成熟 (>80%)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #f39c12;"></div>
+                                <span>生长期 (50-80%)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #e74c3c;"></div>
+                                <span>需关注 (<50%)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="region-grid" id="regionGrid">
+                        <div class="region-block" data-region="A1" onclick="selectRegion('A1')">
+                            <div class="region-status good">健康</div>
+                            <div class="region-name"><i class="fas fa-square"></i> A1区 - 甜椒</div>
+                            <div class="region-stats">
+                                <div class="region-stat">
+                                    <div class="value">85%</div>
+                                    <div class="label">成熟率</div>
+                                </div>
+                                <div class="region-stat">
+                                    <div class="value">128</div>
+                                    <div class="label">作物数</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="region-block" data-region="A2" onclick="selectRegion('A2')">
+                            <div class="region-status warning">注意</div>
+                            <div class="region-name"><i class="fas fa-square"></i> A2区 - 番茄</div>
+                            <div class="region-stats">
+                                <div class="region-stat">
+                                    <div class="value">72%</div>
+                                    <div class="label">成熟率</div>
+                                </div>
+                                <div class="region-stat">
+                                    <div class="value">96</div>
+                                    <div class="label">作物数</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="region-block" data-region="A3" onclick="selectRegion('A3')">
+                            <div class="region-status good">健康</div>
+                            <div class="region-name"><i class="fas fa-square"></i> A3区 - 土豆</div>
+                            <div class="region-stats">
+                                <div class="region-stat">
+                                    <div class="value">91%</div>
+                                    <div class="label">成熟率</div>
+                                </div>
+                                <div class="region-stat">
+                                    <div class="value">156</div>
+                                    <div class="label">作物数</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="region-block" data-region="B1" onclick="selectRegion('B1')">
+                            <div class="region-status danger">紧急</div>
+                            <div class="region-name"><i class="fas fa-square"></i> B1区 - 荔枝</div>
+                            <div class="region-stats">
+                                <div class="region-stat">
+                                    <div class="value">42%</div>
+                                    <div class="label">成熟率</div>
+                                </div>
+                                <div class="region-stat">
+                                    <div class="value">84</div>
+                                    <div class="label">作物数</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="region-block" data-region="B2" onclick="selectRegion('B2')">
+                            <div class="region-status good">健康</div>
+                            <div class="region-name"><i class="fas fa-square"></i> B2区 - 甜椒</div>
+                            <div class="region-stats">
+                                <div class="region-stat">
+                                    <div class="value">88%</div>
+                                    <div class="label">成熟率</div>
+                                </div>
+                                <div class="region-stat">
+                                    <div class="value">112</div>
+                                    <div class="label">作物数</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="region-block" data-region="B3" onclick="selectRegion('B3')">
+                            <div class="region-status warning">注意</div>
+                            <div class="region-name"><i class="fas fa-square"></i> B3区 - 番茄</div>
+                            <div class="region-stats">
+                                <div class="region-stat">
+                                    <div class="value">65%</div>
+                                    <div class="label">成熟率</div>
+                                </div>
+                                <div class="region-stat">
+                                    <div class="value">78</div>
+                                    <div class="label">作物数</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="region-sidebar">
+                    <div class="region-detail-card animate-fade-in" style="animation-delay: 0.2s" id="regionDetail">
+                        <h3><i class="fas fa-info-circle"></i> 区域详情</h3>
+                        <p style="color: var(--text-secondary); text-align: center; padding: 40px 0;">
+                            点击左侧地图选择区域查看详情
+                        </p>
+                    </div>
+
+                    <div class="region-detail-card animate-fade-in" style="animation-delay: 0.3s">
+                        <h3><i class="fas fa-chart-pie"></i> 整体统计</h3>
+                        <div class="quick-stats">
+                            <div class="quick-stat">
+                                <div class="icon">🌱</div>
+                                <div class="value">654</div>
+                                <div class="label">总作物数</div>
+                            </div>
+                            <div class="quick-stat">
+                                <div class="icon">✅</div>
+                                <div class="value">74%</div>
+                                <div class="label">平均成熟率</div>
+                            </div>
+                            <div class="quick-stat">
+                                <div class="icon">📊</div>
+                                <div class="value">6</div>
+                                <div class="label">地块数量</div>
+                            </div>
+                            <div class="quick-stat">
+                                <div class="icon">⚠️</div>
+                                <div class="value">1</div>
+                                <div class="label">需关注地块</div>
+                            </div>
+                        </div>
+                        <div class="crop-distribution-chart">
+                            <canvas id="distributionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <button class="add-region-btn animate-fade-in" style="animation-delay: 0.4s" onclick="addNewRegion()">
+                        <i class="fas fa-plus-circle"></i>
+                        添加新地块
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/page.js"></script>
+    <script>
+        var regionData = {
+            'A1': {
+                name: 'A1区',
+                crop: '甜椒',
+                matureRate: 85,
+                totalCount: 128,
+                avgConfidence: 92,
+                avgQuality: 88,
+                distribution: {young: 10, growing: 25, mature: 85, overripe: 8},
+                status: 'good',
+                lastUpdate: '2024-01-15 14:30'
+            },
+            'A2': {
+                name: 'A2区',
+                crop: '番茄',
+                matureRate: 72,
+                totalCount: 96,
+                avgConfidence: 88,
+                avgQuality: 82,
+                distribution: {young: 15, growing: 28, mature: 42, overripe: 11},
+                status: 'warning',
+                lastUpdate: '2024-01-15 14:25'
+            },
+            'A3': {
+                name: 'A3区',
+                crop: '土豆',
+                matureRate: 91,
+                totalCount: 156,
+                avgConfidence: 95,
+                avgQuality: 92,
+                distribution: {young: 5, growing: 18, mature: 125, overripe: 8},
+                status: 'good',
+                lastUpdate: '2024-01-15 14:20'
+            },
+            'B1': {
+                name: 'B1区',
+                crop: '荔枝',
+                matureRate: 42,
+                totalCount: 84,
+                avgConfidence: 78,
+                avgQuality: 65,
+                distribution: {young: 35, growing: 28, mature: 15, overripe: 6},
+                status: 'danger',
+                lastUpdate: '2024-01-15 14:15'
+            },
+            'B2': {
+                name: 'B2区',
+                crop: '甜椒',
+                matureRate: 88,
+                totalCount: 112,
+                avgConfidence: 91,
+                avgQuality: 89,
+                distribution: {young: 8, growing: 20, mature: 78, overripe: 6},
+                status: 'good',
+                lastUpdate: '2024-01-15 14:10'
+            },
+            'B3': {
+                name: 'B3区',
+                crop: '番茄',
+                matureRate: 65,
+                totalCount: 78,
+                avgConfidence: 85,
+                avgQuality: 78,
+                distribution: {young: 18, growing: 25, mature: 28, overripe: 7},
+                status: 'warning',
+                lastUpdate: '2024-01-15 14:05'
+            }
+        };
+        
+        var selectedRegion = null;
+        var distributionChart = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initDistributionChart();
+            
+            document.getElementById('refreshMapBtn').addEventListener('click', refreshData);
+            document.getElementById('exportRegionBtn').addEventListener('click', exportRegionReport);
+        });
+        
+        function selectRegion(regionId) {
+            document.querySelectorAll('.region-block').forEach(function(block) {
+                block.classList.remove('active');
+            });
+            
+            var block = document.querySelector('[data-region="' + regionId + '"]');
+            if (block) {
+                block.classList.add('active');
+            }
+            
+            selectedRegion = regionData[regionId];
+            showRegionDetail(selectedRegion);
+        }
+        
+        function showRegionDetail(data) {
+            var detail = document.getElementById('regionDetail');
+            var statusClass = data.status === 'good' ? 'good' : data.status === 'warning' ? 'warning' : 'danger';
+            var statusText = data.status === 'good' ? '健康' : data.status === 'warning' ? '注意' : '紧急';
+            
+            detail.innerHTML = `
+                <h3><i class="fas fa-info-circle"></i> ${data.name} 详情</h3>
+                <div style="margin-bottom: 20px;">
+                    <span class="region-status ${statusClass}">${statusText}</span>
+                    <span style="margin-left: 10px; color: var(--text-secondary); font-size: 0.85rem;">
+                        ${data.crop} | 更新: ${data.lastUpdate}
+                    </span>
+                </div>
+                
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <label>作物总数</label>
+                        <span>${data.totalCount}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>成熟率</label>
+                        <span style="color: ${data.matureRate >= 80 ? '#27ae60' : data.matureRate >= 60 ? '#f39c12' : '#e74c3c'}">${data.matureRate}%</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>平均置信度</label>
+                        <span>${data.avgConfidence}%</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>平均品质</label>
+                        <span>${data.avgQuality}</span>
+                    </div>
+                </div>
+                
+                <h4 style="margin: 20px 0 10px;">成熟度分布</h4>
+                <div class="chart-container" style="height: 200px;">
+                    <canvas id="regionChart"></canvas>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="analyzeRegion('${data.name}')">
+                        <i class="fas fa-search"></i> 详细分析
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportSingleRegion('${data.name}')">
+                        <i class="fas fa-download"></i> 导出报告
+                    </button>
+                </div>
+            `;
+            
+            setTimeout(function() {
+                initRegionChart(data.distribution);
+            }, 100);
+        }
+        
+        function initRegionChart(distribution) {
+            var ctx = document.getElementById('regionChart');
+            if (!ctx) return;
+            
+            if (window.regionChartInstance) {
+                window.regionChartInstance.destroy();
+            }
+            
+            window.regionChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['幼嫩期', '生长期', '成熟期', '过熟期'],
+                    datasets: [{
+                        data: [distribution.young, distribution.growing, distribution.mature, distribution.overripe],
+                        backgroundColor: ['#8bc34a', '#ffc107', '#4caf50', '#e53935'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+        
+        function initDistributionChart() {
+            var ctx = document.getElementById('distributionChart');
+            if (!ctx) return;
+            
+            var cropCounts = {
+                '甜椒': 240,
+                '番茄': 174,
+                '土豆': 156,
+                '荔枝': 84
+            };
+            
+            distributionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(cropCounts),
+                    datasets: [{
+                        data: Object.values(cropCounts),
+                        backgroundColor: ['#4caf50', '#f44336', '#ff9800', '#e91e63'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function refreshData() {
+            var toast = document.createElement('div');
+            toast.className = 'toast toast-info';
+            toast.innerHTML = '<i class="fas fa-sync fa-spin"></i><span>正在刷新数据...</span>';
+            document.body.appendChild(toast);
+            setTimeout(function() { toast.classList.add('show'); }, 10);
+            
+            setTimeout(function() {
+                toast.classList.remove('show');
+                setTimeout(function() { toast.remove(); }, 300);
+                
+                var successToast = document.createElement('div');
+                successToast.className = 'toast toast-success';
+                successToast.innerHTML = '<i class="fas fa-check-circle"></i><span>数据刷新成功</span>';
+                document.body.appendChild(successToast);
+                setTimeout(function() { successToast.classList.add('show'); }, 10);
+                setTimeout(function() { 
+                    successToast.classList.remove('show');
+                    setTimeout(function() { successToast.remove(); }, 300);
+                }, 2000);
+            }, 1500);
+        }
+        
+        function exportRegionReport() {
+            var csv = '地块,作物类型,作物总数,成熟率,平均置信度,平均品质,状态,最后更新\n';
+            
+            Object.values(regionData).forEach(function(region) {
+                csv += `${region.name},${region.crop},${region.totalCount},${region.matureRate}%,${region.avgConfidence}%,${region.avgQuality},${region.status === 'good' ? '健康' : region.status === 'warning' ? '注意' : '紧急'},${region.lastUpdate}\n`;
+            });
+            
+            var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'region_analysis_' + new Date().toISOString().slice(0, 10) + '.csv';
+            link.click();
+        }
+        
+        function exportSingleRegion(regionName) {
+            var region = Object.values(regionData).find(function(r) { return r.name === regionName; });
+            if (!region) return;
+            
+            var csv = `地块详情 - ${region.name}\n\n`;
+            csv += `作物类型,作物总数,成熟率,平均置信度,平均品质\n`;
+            csv += `${region.crop},${region.totalCount},${region.matureRate}%,${region.avgConfidence}%,${region.avgQuality}\n\n`;
+            csv += `成熟度分布:\n`;
+            csv += `幼嫩期,生长期,成熟期,过熟期\n`;
+            csv += `${region.distribution.young},${region.distribution.growing},${region.distribution.mature},${region.distribution.overripe}\n`;
+            
+            var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = region.name + '_report.csv';
+            link.click();
+        }
+        
+        function analyzeRegion(regionName) {
+            var toast = document.createElement('div');
+            toast.className = 'toast toast-info';
+            toast.innerHTML = '<i class="fas fa-search"></i><span>正在跳转详细分析...</span>';
+            document.body.appendChild(toast);
+            setTimeout(function() { toast.classList.add('show'); }, 10);
+            
+            setTimeout(function() {
+                toast.classList.remove('show');
+                setTimeout(function() { toast.remove(); }, 300);
+                if (typeof pageManager !== 'undefined') {
+                    pageManager.loadPage('analysis');
+                }
+            }, 1000);
+        }
+        
+        function addNewRegion() {
+            alert('添加新地块功能开发中...');
+        }
+    </script>
+</body>
+</html>

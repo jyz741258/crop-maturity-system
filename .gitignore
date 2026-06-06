@@ -30,4 +30,10 @@ config_local.py
 # 训练数据（太大）
 data/raw/*.jpg
 data/raw/*.png
+crop-image/
 models/*.pkl
+models/*.pth
+*.pt
+output/
+*.bak
+training_history.json

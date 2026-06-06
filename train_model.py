@@ -1,195 +1,41 @@
 import os
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader
-from torchvision import datasets, transforms, models
-from torch.utils.tensorboard import SummaryWriter
-import numpy as np
-import time
-from config import config
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-class CropLeafClassifier(nn.Module):
-    def __init__(self, num_classes=3):
-        super(CropLeafClassifier, self).__init__()
-        self.resnet = models.resnet18(pretrained=True)
-        
-        for param in self.resnet.parameters():
-            param.requires_grad = False
-        
-        num_ftrs = self.resnet.fc.in_features
-        self.resnet.fc = nn.Sequential(
-            nn.Linear(num_ftrs, 512),
-            nn.ReLU(),
-            nn.Dropout(0.5),
-            nn.Linear(512, num_classes)
-        )
-    
-    def forward(self, x):
-        return self.resnet(x)
-
-def get_data_transforms():
-    train_transform = transforms.Compose([
-        transforms.RandomResizedCrop(config.IMAGE_SIZE[0]),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomVerticalFlip(),
-        transforms.RandomRotation(30),
-        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
-    
-    val_test_transform = transforms.Compose([
-        transforms.Resize(config.IMAGE_SIZE),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
-    
-    return train_transform, val_test_transform
-
-def get_dataloaders(train_transform, val_test_transform):
-    train_dataset = datasets.ImageFolder(
-        root=os.path.join(config.AUGMENTED_DATA_DIR, 'train'),
-        transform=train_transform
-    )
-    
-    val_dataset = datasets.ImageFolder(
-        root=os.path.join(config.PROCESSED_DATA_DIR, 'val'),
-        transform=val_test_transform
-    )
-    
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=config.BATCH_SIZE,
-        shuffle=config.SHUFFLE,
-        num_workers=config.NUM_WORKERS,
-        pin_memory=config.PIN_MEMORY
-    )
-    
-    val_loader = DataLoader(
-        val_dataset,
-        batch_size=config.BATCH_SIZE,
-        shuffle=False,
-        num_workers=config.NUM_WORKERS,
-        pin_memory=config.PIN_MEMORY
-    )
-    
-    return train_loader, val_loader, train_dataset.classes
-
-def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler, num_epochs):
-    os.makedirs(config.LOG_DIR, exist_ok=True)
-    writer = SummaryWriter(log_dir=config.LOG_DIR)
-    
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model.to(device)
-    
-    best_val_acc = 0.0
-    early_stop_count = 0
-    
-    for epoch in range(num_epochs):
-        print(f'\nEpoch {epoch+1}/{num_epochs}')
-        print('-' * 10)
-        
-        model.train()
-        train_loss = 0.0
-        train_correct = 0
-        train_total = 0
-        
-        start_time = time.time()
-        
-        for inputs, labels in train_loader:
-            inputs = inputs.to(device)
-            labels = labels.to(device)
-            
-            optimizer.zero_grad()
-            
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-            
-            loss.backward()
-            optimizer.step()
-            
-            train_loss += loss.item() * inputs.size(0)
-            _, preds = torch.max(outputs, 1)
-            train_correct += torch.sum(preds == labels.data)
-            train_total += inputs.size(0)
-        
-        train_loss = train_loss / train_total
-        train_acc = train_correct.double() / train_total
-        
-        model.eval()
-        val_loss = 0.0
-        val_correct = 0
-        val_total = 0
-        
-        with torch.no_grad():
-            for inputs, labels in val_loader:
-                inputs = inputs.to(device)
-                labels = labels.to(device)
-                
-                outputs = model(inputs)
-                loss = criterion(outputs, labels)
-                
-                val_loss += loss.item() * inputs.size(0)
-                _, preds = torch.max(outputs, 1)
-                val_correct += torch.sum(preds == labels.data)
-                val_total += inputs.size(0)
-        
-        val_loss = val_loss / val_total
-        val_acc = val_correct.double() / val_total
-        
-        if config.USE_LR_SCHEDULER:
-            scheduler.step(val_loss)
-        
-        writer.add_scalar('Loss/train', train_loss, epoch)
-        writer.add_scalar('Loss/val', val_loss, epoch)
-        writer.add_scalar('Accuracy/train', train_acc, epoch)
-        writer.add_scalar('Accuracy/val', val_acc, epoch)
-        
-        epoch_time = time.time() - start_time
-        print(f'Train Loss: {train_loss:.4f} Acc: {train_acc:.4f}')
-        print(f'Val Loss: {val_loss:.4f} Acc: {val_acc:.4f}')
-        print(f'Epoch Time: {epoch_time:.2f}s')
-        
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
-            early_stop_count = 0
-            os.makedirs(config.MODEL_SAVE_DIR, exist_ok=True)
-            best_model_path = os.path.join(config.MODEL_SAVE_DIR, 'best_model.pth')
-            torch.save(model.state_dict(), best_model_path)
-            print(f'New best model saved with accuracy: {best_val_acc:.4f}')
-        else:
-            early_stop_count += 1
-            if early_stop_count >= config.EARLY_STOP_PATIENCE:
-                print(f'Early stopping after {config.EARLY_STOP_PATIENCE} epochs without improvement')
-                break
-    
-    writer.close()
-    return model
+from models.deep_learning_model import train_model_main, DeepLearningMaturityDetector
 
 def main():
-    print("Initializing training...")
+    import argparse
+    parser = argparse.ArgumentParser(description='训练叶片成熟度检测深度学习模型')
+    parser.add_argument('--data_dir', type=str, required=True, help='数据集目录，包含各成熟度子文件夹')
+    parser.add_argument('--save_path', type=str, default='models/leaf_maturity_model.pth', help='模型保存路径')
+    parser.add_argument('--epochs', type=int, default=20, help='训练轮数')
+    parser.add_argument('--batch_size', type=int, default=32, help='批量大小')
+    parser.add_argument('--lr', type=float, default=0.0001, help='学习率')
+    parser.add_argument('--test', action='store_true', help='测试现有模型')
     
-    train_transform, val_test_transform = get_data_transforms()
-    train_loader, val_loader, classes = get_dataloaders(train_transform, val_test_transform)
+    args = parser.parse_args()
     
-    print(f"Classes found: {classes}")
-    print(f"Training samples: {len(train_loader.dataset)}")
-    print(f"Validation samples: {len(val_loader.dataset)}")
-    
-    model = CropLeafClassifier(num_classes=config.NUM_CLASSES)
-    
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_DECAY)
-    
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode='min', factor=config.LR_DECAY_FACTOR, 
-        patience=config.LR_DECAY_PATIENCE, verbose=True
-    )
-    
-    model = train_model(model, train_loader, val_loader, criterion, optimizer, scheduler, config.EPOCHS)
-    
-    print("Training complete!")
+    if args.test:
+        print("测试现有模型...")
+        detector = DeepLearningMaturityDetector(args.save_path)
+        if detector.model:
+            print("模型加载成功，准备进行推理测试")
+        else:
+            print("模型加载失败")
+    else:
+        print(f"开始训练模型...")
+        print(f"数据集目录: {args.data_dir}")
+        print(f"模型保存路径: {args.save_path}")
+        print(f"训练轮数: {args.epochs}")
+        print(f"批量大小: {args.batch_size}")
+        print(f"学习率: {args.lr}")
+        
+        result = train_model_main(args.data_dir, args.save_path)
+        
+        print("\n训练完成！")
+        print(f"最佳验证准确率: {result['best_val_acc']:.4f}")
+        print(f"测试准确率: {result['test_acc']:.4f}")
 
 if __name__ == '__main__':
     main()

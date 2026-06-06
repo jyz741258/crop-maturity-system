@@ -36,18 +36,25 @@ try:
     from utils.export_utils import ExportUtils
     from utils.dashboard_config import DashboardConfig
     from data.maturity_standards import get_maturity_stage, get_all_crop_types, get_crop_standards
+    from data.knowledge_base import search_knowledge, get_knowledge, get_all_crop_names
 
     crop_detector = CropDetector()
     feature_extractor = FeatureExtractor()
     maturity_classifier = MaturityClassifier()
     visualizer = ImageVisualizer()
-    maturity_detector = MaturityDetector()
+    
+    model_path = 'models/leaf_maturity_model.pth'
+    use_deep_learning = os.path.exists(model_path)
+    maturity_detector = MaturityDetector(use_deep_learning=use_deep_learning, model_path=model_path)
+    
     export_utils = ExportUtils()
     dashboard_config = DashboardConfig()
 
     if os.path.exists('models/maturity_model.pkl'):
         maturity_classifier.load_model('models/maturity_model.pkl')
         print("已加载预训练模型")
+    
+    print(f"深度学习模式: {'启用' if use_deep_learning else '禁用'}")
 except Exception as e:
     print(f"模型加载失败: {e}")
 
@@ -495,6 +502,58 @@ def generate_report():
 def download_report(filename):
     return send_file(os.path.join(app.config['REPORT_FOLDER'], filename), as_attachment=True)
 
+def format_knowledge_result(results):
+    """格式化知识库搜索结果"""
+    if not results:
+        return ''
+    
+    formatted = ''
+    for crop_name, data in results.items():
+        formatted += f"🌱 **{crop_name}**\n\n"
+        
+        for key, value in data.items():
+            if isinstance(value, dict):
+                if 'symptom' in value and 'occurrence' in value and 'control' in value:
+                    formatted += f"  🚨 {key}\n"
+                    formatted += f"    - 症状：{value.get('symptom', '')}\n"
+                    formatted += f"    - 发生条件：{value.get('occurrence', '')}\n"
+                    formatted += f"    - 防治方法：{value.get('control', '')}\n\n"
+                elif 'origin' in value and 'characteristics' in value:
+                    formatted += f"  🌟 {key}\n"
+                    formatted += f"    - 来源：{value.get('origin', '')}\n"
+                    formatted += f"    - 特性：{value.get('characteristics', '')}\n"
+                    formatted += f"    - 适宜区域：{value.get('suitable_area', '')}\n"
+                    formatted += f"    - 适宜产品：{value.get('suitable_products', '')}\n\n"
+                else:
+                    formatted += f"  📖 {key}\n"
+                    for sub_key, sub_value in value.items():
+                        if isinstance(sub_value, dict):
+                            formatted += f"    - {sub_key}：\n"
+                            if 'symptom' in sub_value:
+                                formatted += f"      * 症状：{sub_value.get('symptom', '')}\n"
+                                formatted += f"      * 发生条件：{sub_value.get('occurrence', '')}\n"
+                                formatted += f"      * 防治方法：{sub_value.get('control', '')}\n"
+                            else:
+                                formatted += f"      * 特性：{sub_value.get('characteristics', '')}\n"
+                        else:
+                            formatted += f"    - {sub_key}：{sub_value}\n"
+                    formatted += "\n"
+            else:
+                formatted += f"  📋 {key}\n"
+                lines = value.split('\n')
+                for line in lines[:10]:
+                    line = line.strip()
+                    if line and not line.startswith('#'):
+                        if line.startswith('-') or line.startswith('###'):
+                            formatted += f"    {line}\n"
+                        else:
+                            formatted += f"    {line}\n"
+                if len(lines) > 10:
+                    formatted += "    ...（内容较长，如需完整信息请进一步询问）\n"
+                formatted += "\n"
+    
+    return formatted.strip()
+
 def get_ai_response(question):
     question = question.lower().strip()
     
@@ -537,6 +596,9 @@ def get_ai_response(question):
             🌱 作物管理
             - 作物库：管理支持的作物类型 [跳转:作物库]
             - 标准维护：查看成熟度判定标准
+
+            🤖 AI助手
+            - 农业知识库：提供种植方式、环境需求、病虫害防治等专业知识
         ''',
         '上传图片': '''
             上传图片进行分析的步骤：
@@ -598,11 +660,13 @@ def get_ai_response(question):
             - 烟叶（Tobacco）：GB 2635-2018标准
             - 桑叶（Mulberry）：NY/T 1187-2006标准
 
-            ➕ 添加新作物
-            1. 在 E:\\crop-image 目录下创建以作物名称命名的文件夹
-            2. 将作物图片放入该文件夹
-            3. 更新 config.py 中的 CLASSES 列表
-            4. 在 data/maturity_standards.py 中添加成熟度判定标准
+            💡 知识库支持
+            您可以询问关于这些作物的：
+            - 种植方式（如"茶叶怎么种植？"）
+            - 环境需求（如"菠菜需要什么气候条件？"）
+            - 病虫害防治（如"生菜常见病虫害有哪些？"）
+            - 品种介绍（如"芹菜有哪些品种？"）
+            - 采收技术（如"桑叶什么时候采摘？"）
         ''',
         '批量分析': '''
             使用批量分析功能：
@@ -824,6 +888,13 @@ def get_ai_response(question):
             - 浏览器：Chrome、Firefox、Edge
             - 网络：稳定的网络连接
             - 硬件：建议配置较高的GPU（视频分析）
+
+            🤖 AI助手
+            您可以询问农业相关知识，例如：
+            - "茶叶怎么种植？"
+            - "菠菜需要什么气候条件？"
+            - "生菜常见病虫害有哪些？"
+            - "芹菜有哪些品种？"
         ''',
         '快捷键': '''
             系统快捷键：
@@ -857,6 +928,10 @@ def get_ai_response(question):
             if keyword in question:
                 return responses.get(key, responses['功能']).strip()
     
+    knowledge_results = search_knowledge(question)
+    if knowledge_results:
+        return format_knowledge_result(knowledge_results)
+    
     return '''
         您好！我是作物成熟度检测系统的AI助手。我可以帮助您了解以下内容：
         
@@ -868,12 +943,16 @@ def get_ai_response(question):
         - 历史记录：管理检测记录
         - 作物库：查看支持的作物类型
         
-        🎯 **常见问题**
-        - 如何上传图片进行分析？
-        - 如何下载分析报告？
-        - 系统支持哪些作物类型？
-        - 分析结果如何解读？
-        - 成熟度判定标准是什么？
+        � **农业知识库**
+        我还可以回答关于以下作物的专业问题：
+        - 茶叶、烟叶、桑叶、生菜、菠菜、芹菜
+        
+        �� **知识库问题示例**
+        - 种植方式："茶叶怎么种植？"、"菠菜的种植方法"
+        - 环境需求："芹菜需要什么气候条件？"、"生菜的生长环境"
+        - 病虫害防治："茶叶病虫害有哪些？"、"如何防治生菜霜霉病？"
+        - 品种介绍："芹菜有哪些品种？"、"茶叶品种推荐"
+        - 采收技术："桑叶什么时候采摘？"、"菠菜的采收时间"
         
         📚 **帮助主题**
         - 登录与权限
@@ -887,8 +966,11 @@ def get_ai_response(question):
 @app.route('/api/ai/ask', methods=['POST'])
 def ai_ask():
     try:
-        data = request.get_json()
+        data = request.get_json(force=True)
         question = data.get('question', '')
+        
+        if isinstance(question, bytes):
+            question = question.decode('utf-8')
         
         answer = get_ai_response(question)
         
@@ -911,7 +993,7 @@ def analyze_maturity():
             return jsonify({'error': '未上传图片'}), 400
         
         file = request.files['image']
-        crop_type = request.form.get('crop_type', 'Tomato')
+        crop_type = request.form.get('crop_type', 'tea')
         
         if file.filename == '':
             return jsonify({'error': '未选择图片'}), 400

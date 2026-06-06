@@ -264,7 +264,7 @@
                     <div class="region-grid" id="regionGrid">
                         <div class="region-block" data-region="A1" onclick="selectRegion('A1')">
                             <div class="region-status good">健康</div>
-                            <div class="region-name"><i class="fas fa-square"></i> A1区 - 甜椒</div>
+                            <div class="region-name"><i class="fas fa-square"></i> A1区 - 茶叶</div>
                             <div class="region-stats">
                                 <div class="region-stat">
                                     <div class="value">85%</div>
@@ -279,7 +279,7 @@
                         
                         <div class="region-block" data-region="A2" onclick="selectRegion('A2')">
                             <div class="region-status warning">注意</div>
-                            <div class="region-name"><i class="fas fa-square"></i> A2区 - 番茄</div>
+                            <div class="region-name"><i class="fas fa-square"></i> A2区 - 烟叶</div>
                             <div class="region-stats">
                                 <div class="region-stat">
                                     <div class="value">72%</div>
@@ -294,7 +294,7 @@
                         
                         <div class="region-block" data-region="A3" onclick="selectRegion('A3')">
                             <div class="region-status good">健康</div>
-                            <div class="region-name"><i class="fas fa-square"></i> A3区 - 土豆</div>
+                            <div class="region-name"><i class="fas fa-square"></i> A3区 - 桑叶</div>
                             <div class="region-stats">
                                 <div class="region-stat">
                                     <div class="value">91%</div>
@@ -309,7 +309,7 @@
                         
                         <div class="region-block" data-region="B1" onclick="selectRegion('B1')">
                             <div class="region-status danger">紧急</div>
-                            <div class="region-name"><i class="fas fa-square"></i> B1区 - 荔枝</div>
+                            <div class="region-name"><i class="fas fa-square"></i> B1区 - 生菜</div>
                             <div class="region-stats">
                                 <div class="region-stat">
                                     <div class="value">42%</div>
@@ -324,7 +324,7 @@
                         
                         <div class="region-block" data-region="B2" onclick="selectRegion('B2')">
                             <div class="region-status good">健康</div>
-                            <div class="region-name"><i class="fas fa-square"></i> B2区 - 甜椒</div>
+                            <div class="region-name"><i class="fas fa-square"></i> B2区 - 茶叶</div>
                             <div class="region-stats">
                                 <div class="region-stat">
                                     <div class="value">88%</div>
@@ -339,7 +339,7 @@
                         
                         <div class="region-block" data-region="B3" onclick="selectRegion('B3')">
                             <div class="region-status warning">注意</div>
-                            <div class="region-name"><i class="fas fa-square"></i> B3区 - 番茄</div>
+                            <div class="region-name"><i class="fas fa-square"></i> B3区 - 烟叶</div>
                             <div class="region-stats">
                                 <div class="region-stat">
                                     <div class="value">65%</div>
@@ -405,7 +405,7 @@
         var regionData = {
             'A1': {
                 name: 'A1区',
-                crop: '甜椒',
+                crop: '茶叶',
                 matureRate: 85,
                 totalCount: 128,
                 avgConfidence: 92,
@@ -416,7 +416,7 @@
             },
             'A2': {
                 name: 'A2区',
-                crop: '番茄',
+                crop: '烟叶',
                 matureRate: 72,
                 totalCount: 96,
                 avgConfidence: 88,
@@ -427,7 +427,7 @@
             },
             'A3': {
                 name: 'A3区',
-                crop: '土豆',
+                crop: '桑叶',
                 matureRate: 91,
                 totalCount: 156,
                 avgConfidence: 95,
@@ -438,7 +438,7 @@
             },
             'B1': {
                 name: 'B1区',
-                crop: '荔枝',
+                crop: '生菜',
                 matureRate: 42,
                 totalCount: 84,
                 avgConfidence: 78,
@@ -449,7 +449,7 @@
             },
             'B2': {
                 name: 'B2区',
-                crop: '甜椒',
+                crop: '茶叶',
                 matureRate: 88,
                 totalCount: 112,
                 avgConfidence: 91,
@@ -460,7 +460,7 @@
             },
             'B3': {
                 name: 'B3区',
-                crop: '番茄',
+                crop: '烟叶',
                 matureRate: 65,
                 totalCount: 78,
                 avgConfidence: 85,
@@ -584,10 +584,10 @@
             if (!ctx) return;
             
             var cropCounts = {
-                '甜椒': 240,
-                '番茄': 174,
-                '土豆': 156,
-                '荔枝': 84
+                '茶叶': 240,
+                '烟叶': 174,
+                '桑叶': 156,
+                '生菜': 84
             };
             
             distributionChart = new Chart(ctx, {

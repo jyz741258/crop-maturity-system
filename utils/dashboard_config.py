@@ -26,7 +26,7 @@ class DashboardConfig:
             {'id': 'scatterChart', 'type': 'scatter', 'title': '散点分布图', 'visible': False, 'size': 'large'},
             {'id': 'heatmapChart', 'type': 'heatmap', 'title': '地块热力图', 'visible': False, 'size': 'large'}
         ],
-        'crop_types': ['Pepper__bell', 'Potato', 'Tomato', 'Lychee'],
+        'crop_types': ['tea', 'tobacco', 'mulberry', 'lettuce'],
         'data_range': '7days',
         'language': 'zh-CN'
     }

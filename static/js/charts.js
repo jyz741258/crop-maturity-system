@@ -429,7 +429,7 @@ class CropCharts {
         }
 
         const chartData = data || {
-            labels: ['甜椒', '土豆', '番茄', '荔枝', '生菜', '菠菜'],
+            labels: ['茶叶', '烟叶', '桑叶', '生菜', '菠菜', '芹菜'],
             scores: [85, 78, 88, 82, 76, 80]
         };
 
@@ -678,7 +678,7 @@ class CropCharts {
                 growing: [80, 75, 90, 85, 95, 88, 92]
             },
             barData: {
-                labels: ['甜椒', '土豆', '番茄', '荔枝'],
+                labels: ['茶叶', '烟叶', '桑叶', '生菜'],
                 values: [85, 78, 92, 88]
             },
             radarData: {

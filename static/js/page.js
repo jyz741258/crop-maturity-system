@@ -338,7 +338,7 @@ class PageManager {
                             </div>
                             <div class="notification-content">
                                 <div class="notification-title">分析任务完成</div>
-                                <div class="notification-desc">您的甜椒种植区图片分析已完成，成熟率 85%</div>
+                                <div class="notification-desc">您的茶叶种植区图片分析已完成，成熟率 85%</div>
                                 <div class="notification-time">10分钟前</div>
                             </div>
                         </div>
@@ -348,7 +348,7 @@ class PageManager {
                             </div>
                             <div class="notification-content">
                                 <div class="notification-title">作物成熟预警</div>
-                                <div class="notification-desc">番茄大棚检测显示部分作物已达最佳采收期</div>
+                                <div class="notification-desc">桑叶大棚检测显示部分作物已达最佳采收期</div>
                                 <div class="notification-time">30分钟前</div>
                             </div>
                         </div>
@@ -984,7 +984,7 @@ class PageManager {
                     self.charts.qualityBar = new Chart(qualityBar, {
                         type: 'bar',
                         data: {
-                            labels: ['甜椒', '土豆', '番茄', '荔枝'],
+                            labels: ['茶叶', '烟叶', '桑叶', '生菜'],
                             datasets: [{
                                 label: '品质评分',
                                 data: [85, 78, 92, 88],
@@ -1085,9 +1085,9 @@ class PageManager {
         if (!recentList) return;
 
         var mockRecent = [
-            { id: 1, name: '甜椒种植区.jpg', crop: '甜椒', date: '10分钟前', matureRate: 85 },
-            { id: 2, name: '土豆田航拍.jpg', crop: '土豆', date: '30分钟前', matureRate: 78 },
-            { id: 3, name: '番茄大棚检测.jpg', crop: '番茄', date: '1小时前', matureRate: 92 }
+            { id: 1, name: 'tea_field.jpg', crop: '茶叶', date: '10分钟前', matureRate: 85 },
+            { id: 2, name: 'tobacco_field.jpg', crop: '烟叶', date: '30分钟前', matureRate: 78 },
+            { id: 3, name: 'mulberry_greenhouse.jpg', crop: '桑叶', date: '1小时前', matureRate: 92 }
         ];
 
         var self = this;
@@ -1320,11 +1320,11 @@ class PageManager {
         if (!historyTableBody) return;
 
         var mockHistory = [
-            { id: 'REC-2024-001', name: '甜椒种植区.jpg', crop: '甜椒', date: '2024-01-15 14:30:25', matureRate: 85 },
-            { id: 'REC-2024-002', name: '土豆田航拍.jpg', crop: '土豆', date: '2024-01-14 10:15:42', matureRate: 78 },
-            { id: 'REC-2024-003', name: '番茄大棚检测.jpg', crop: '番茄', date: '2024-01-13 16:45:18', matureRate: 92 },
-            { id: 'REC-2024-004', name: '甜椒地块B.jpg', crop: '甜椒', date: '2024-01-12 09:20:33', matureRate: 88 },
-            { id: 'REC-2024-005', name: '土豆样本集.jpg', crop: '土豆', date: '2024-01-11 11:30:55', matureRate: 72 }
+            { id: 'REC-2024-001', name: 'tea_field.jpg', crop: '茶叶', date: '2024-01-15 14:30:25', matureRate: 85 },
+            { id: 'REC-2024-002', name: 'tobacco_field.jpg', crop: '烟叶', date: '2024-01-14 10:15:42', matureRate: 78 },
+            { id: 'REC-2024-003', name: 'mulberry_greenhouse.jpg', crop: '桑叶', date: '2024-01-13 16:45:18', matureRate: 92 },
+            { id: 'REC-2024-004', name: 'tea_fieldB.jpg', crop: '茶叶', date: '2024-01-12 09:20:33', matureRate: 88 },
+            { id: 'REC-2024-005', name: 'tobacco_samples.jpg', crop: '烟叶', date: '2024-01-11 11:30:55', matureRate: 72 }
         ];
 
         var self = this;
@@ -1405,10 +1405,12 @@ class PageManager {
         if (!cropGrid) return;
 
         var crops = [
-            { id: 'Pepper__bell', name: '甜椒', icon: '🫑', desc: '果实成熟时呈绿色或红色，富含维生素C', standards: 'GB/T 19630-2005' },
-            { id: 'Potato', name: '土豆', icon: '🥔', desc: '块茎作物，叶片繁茂期为最佳检测时机', standards: 'GB/T 8321-2012' },
-            { id: 'Tomato', name: '番茄', icon: '🍅', desc: '果实成熟时颜色从绿转红，叶片健康直接影响产量', standards: 'GB/T 19175-2003' },
-            { id: 'Lychee', name: '荔枝', icon: '🍒', desc: '常绿果树，叶片状态反映树体营养状况', standards: 'GB/T 18470-2001' }
+            { id: 'tea', name: '茶叶', icon: '🍵', desc: '叶用经济作物，嫩叶可制茶，富含茶多酚', standards: 'GB/T 23776-2018' },
+            { id: 'tobacco', name: '烟叶', icon: '🍃', desc: '叶用经济作物，用于卷烟生产，需严格品质控制', standards: 'GB 2635-2018' },
+            { id: 'mulberry', name: '桑叶', icon: '🌿', desc: '蚕桑专用叶用作物，叶片质量直接影响蚕丝品质', standards: 'NY/T 1187-2006' },
+            { id: 'lettuce', name: '生菜', icon: '🥬', desc: '叶用蔬菜，口感脆嫩，富含维生素和膳食纤维', standards: 'GB/T 18407.1-2001' },
+            { id: 'spinach', name: '菠菜', icon: '🥗', desc: '叶用蔬菜，富含铁元素和维生素，营养价值高', standards: 'NY/T 5008-2016' },
+            { id: 'celery', name: '芹菜', icon: '🥕', desc: '叶用蔬菜，富含膳食纤维和维生素，具有清香风味', standards: 'NY/T 5008-2016' }
         ];
 
         cropGrid.innerHTML = crops.map(function(crop, idx) {

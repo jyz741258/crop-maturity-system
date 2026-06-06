@@ -47,7 +47,7 @@ class Config:
     PIN_MEMORY = True
     
     # 类别信息
-    CLASSES = ['Pepper__bell', 'Potato', 'Tomato', 'Lychee']
+    CLASSES = ['tea', 'tobacco', 'mulberry', 'lettuce', 'spinach', 'celery']
     NUM_CLASSES = len(CLASSES)
     
     # 日志参数

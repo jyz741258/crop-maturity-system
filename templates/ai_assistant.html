@@ -258,6 +258,43 @@
             color: white;
         }
 
+        .knowledge-section {
+            padding: 12px 20px;
+            background: #fff8e1;
+            border-top: 1px solid #ffeb3b;
+        }
+
+        .knowledge-section p {
+            font-size: 0.85rem;
+            color: #e65100;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .knowledge-section .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .knowledge-section .tag {
+            padding: 5px 12px;
+            background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);
+            border: none;
+            border-radius: 18px;
+            font-size: 0.8rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(255, 152, 0, 0.3);
+        }
+
+        .knowledge-section .tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.4);
+            background: linear-gradient(135deg, #ff5722 0%, #ff9800 100%);
+        }
+
         .typing-indicator {
             display: flex;
             gap: 5px;
@@ -323,6 +360,18 @@
                 <span class="tag" onclick="sendMessage('结果如何解读？')">结果解读</span>
                 <span class="tag" onclick="sendMessage('视频分析功能')">视频分析</span>
                 <span class="tag" onclick="sendMessage('历史记录管理')">历史记录</span>
+            </div>
+        </div>
+
+        <div class="knowledge-section">
+            <p>🌱 农业知识库：</p>
+            <div class="tags">
+                <span class="tag knowledge-tag" onclick="sendMessage('茶叶种植方式')">茶叶种植</span>
+                <span class="tag knowledge-tag" onclick="sendMessage('菠菜环境需求')">菠菜环境</span>
+                <span class="tag knowledge-tag" onclick="sendMessage('生菜病虫害')">生菜病虫害</span>
+                <span class="tag knowledge-tag" onclick="sendMessage('芹菜品种')">芹菜品种</span>
+                <span class="tag knowledge-tag" onclick="sendMessage('桑叶采收')">桑叶采收</span>
+                <span class="tag knowledge-tag" onclick="sendMessage('烟叶农药使用')">烟叶农药</span>
             </div>
         </div>
 

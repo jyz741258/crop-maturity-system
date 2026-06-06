@@ -5,45 +5,82 @@ from scipy import ndimage
 from skimage import color, feature, filters
 import base64
 import io
+import os
 
 class MaturityDetector:
-    def __init__(self):
+    def __init__(self, use_deep_learning=False, model_path=None):
+        self.use_deep_learning = use_deep_learning
+        self.deep_detector = None
+        
+        if self.use_deep_learning:
+            try:
+                from models.deep_learning_model import DeepLearningMaturityDetector
+                self.deep_detector = DeepLearningMaturityDetector(model_path)
+                print("已启用深度学习模型")
+            except Exception as e:
+                print(f"加载深度学习模型失败，将使用传统算法: {e}")
+                self.use_deep_learning = False
+        
         self.crop_standards = {
-            'Pepper__bell': {
-                'name': '甜椒',
-                'color_ranges': {
-                    'immature': [(35, 43, 46), (77, 255, 255)],
-                    'mature': [(25, 43, 46), (34, 255, 255)],
-                    'overripe': [(0, 43, 46), (10, 255, 255)]
-                },
-                'maturity_thresholds': {'green_ratio': 0.6, 'color_variance': 30}
-            },
-            'Potato': {
-                'name': '土豆',
+            'tea': {
+                'name': '茶叶',
                 'color_ranges': {
                     'immature': [(35, 43, 46), (80, 255, 255)],
-                    'mature': [(20, 30, 50), (35, 60, 150)],
-                    'overripe': [(10, 20, 30), (25, 40, 100)]
+                    'mature': [(25, 43, 46), (70, 255, 255)],
+                    'overripe': [(20, 30, 50), (35, 60, 150)],
+                    'senescent': [(10, 20, 30), (25, 40, 100)]
                 },
-                'maturity_thresholds': {'green_ratio': 0.4, 'texture_score': 0.3}
+                'maturity_thresholds': {'green_ratio': 0.7, 'texture_score': 0.5}
             },
-            'Tomato': {
-                'name': '番茄',
+            'tobacco': {
+                'name': '烟叶',
                 'color_ranges': {
-                    'immature': [(35, 43, 46), (77, 255, 255)],
-                    'mature': [(10, 100, 100), (15, 255, 255)],
-                    'overripe': [(0, 100, 100), (8, 255, 255)]
+                    'immature': [(35, 43, 46), (85, 255, 255)],
+                    'mature': [(20, 43, 46), (60, 255, 255)],
+                    'overripe': [(15, 30, 50), (30, 60, 150)],
+                    'senescent': [(10, 20, 30), (25, 40, 100)]
                 },
-                'maturity_thresholds': {'red_ratio': 0.5, 'color_variance': 40}
+                'maturity_thresholds': {'green_ratio': 0.6, 'color_variance': 35}
             },
-            'Lychee': {
-                'name': '荔枝',
+            'mulberry': {
+                'name': '桑叶',
                 'color_ranges': {
                     'immature': [(35, 43, 46), (80, 255, 255)],
-                    'mature': [(0, 43, 100), (10, 255, 255)],
-                    'overripe': [(10, 43, 100), (20, 255, 255)]
+                    'mature': [(25, 43, 46), (70, 255, 255)],
+                    'overripe': [(20, 30, 50), (35, 60, 150)],
+                    'senescent': [(10, 20, 30), (25, 40, 100)]
                 },
-                'maturity_thresholds': {'red_ratio': 0.6, 'texture_score': 0.4}
+                'maturity_thresholds': {'green_ratio': 0.65, 'texture_score': 0.45}
+            },
+            'lettuce': {
+                'name': '生菜',
+                'color_ranges': {
+                    'immature': [(35, 43, 46), (85, 255, 255)],
+                    'mature': [(25, 43, 46), (75, 255, 255)],
+                    'overripe': [(20, 30, 50), (35, 60, 150)],
+                    'senescent': [(10, 20, 30), (25, 40, 100)]
+                },
+                'maturity_thresholds': {'green_ratio': 0.75, 'color_variance': 30}
+            },
+            'spinach': {
+                'name': '菠菜',
+                'color_ranges': {
+                    'immature': [(35, 43, 46), (85, 255, 255)],
+                    'mature': [(25, 43, 46), (70, 255, 255)],
+                    'overripe': [(20, 30, 50), (35, 60, 150)],
+                    'senescent': [(10, 20, 30), (25, 40, 100)]
+                },
+                'maturity_thresholds': {'green_ratio': 0.7, 'texture_score': 0.45}
+            },
+            'celery': {
+                'name': '芹菜',
+                'color_ranges': {
+                    'immature': [(35, 43, 46), (80, 255, 255)],
+                    'mature': [(25, 43, 46), (70, 255, 255)],
+                    'overripe': [(20, 30, 50), (35, 60, 150)],
+                    'senescent': [(10, 20, 30), (25, 40, 100)]
+                },
+                'maturity_thresholds': {'green_ratio': 0.65, 'texture_score': 0.5}
             }
         }
 
@@ -60,7 +97,7 @@ class MaturityDetector:
             contours = self._detect_contours(image)
             
             for i, contour in enumerate(contours[:20]):
-                crop_result = self._analyze_single_crop(image, image_hsv, contour, i)
+                crop_result = self._analyze_single_crop(image, image_hsv, contour, i, image_path)
                 if crop_result:
                     results.append(crop_result)
             
@@ -79,7 +116,7 @@ class MaturityDetector:
         contours = sorted(contours, key=cv2.contourArea, reverse=True)
         return [c for c in contours if cv2.contourArea(c) > 100]
 
-    def _analyze_single_crop(self, image, hsv_image, contour, index):
+    def _analyze_single_crop(self, image, hsv_image, contour, index, image_path=None):
         try:
             x, y, w, h = cv2.boundingRect(contour)
             if w < 20 or h < 20:
@@ -92,7 +129,19 @@ class MaturityDetector:
             texture_features = self._extract_texture_features(rgb_roi)
             shape_features = self._extract_shape_features(contour)
             
-            maturity, confidence = self._classify_maturity(color_features, texture_features)
+            if self.use_deep_learning and self.deep_detector and image_path:
+                roi_path = f'temp_roi_{index}.jpg'
+                cv2.imwrite(roi_path, rgb_roi)
+                dl_result = self.deep_detector.predict(roi_path)
+                os.remove(roi_path)
+                
+                if dl_result:
+                    maturity = dl_result['maturity']
+                    confidence = dl_result['confidence']
+                else:
+                    maturity, confidence = self._classify_maturity(color_features, texture_features)
+            else:
+                maturity, confidence = self._classify_maturity(color_features, texture_features)
             
             return {
                 'id': f'crop_{index + 1}',
@@ -104,7 +153,8 @@ class MaturityDetector:
                 'color_variance': round(color_features['variance'], 1),
                 'texture_score': round(texture_features['score'], 2),
                 'shape_score': round(shape_features['score'], 2),
-                'quality_score': round(self._calculate_quality(maturity, confidence, texture_features['score']), 1)
+                'quality_score': round(self._calculate_quality(maturity, confidence, texture_features['score']), 1),
+                'detection_type': 'leaf'
             }
         except Exception as e:
             return None
@@ -202,24 +252,24 @@ class MaturityDetector:
             if color_variance < 25:
                 return ('幼嫩期', 0.85)
             else:
-                return ('生长期', 0.75)
+                return ('成熟期', 0.75)
         elif red_ratio > 0.3 or (green_ratio < 0.3 and red_ratio > 0.1):
             if color_variance > 35:
-                return ('过熟期', 0.8)
+                return ('衰老期', 0.8)
             else:
-                return ('成熟期', 0.9)
+                return ('过熟期', 0.9)
         else:
             if texture_score > 0.4:
                 return ('成熟期', 0.7)
             else:
-                return ('生长期', 0.65)
+                return ('幼嫩期', 0.65)
 
     def _calculate_quality(self, maturity, confidence, texture_score):
         base_score = {
-            '幼嫩期': 60,
-            '生长期': 75,
-            '成熟期': 90,
-            '过熟期': 50
+            '幼嫩期': 70,
+            '成熟期': 95,
+            '过熟期': 60,
+            '衰老期': 30
         }.get(maturity, 70)
         
         return base_score * (confidence / 100) * (0.8 + texture_score * 0.4)
@@ -240,7 +290,6 @@ class MaturityDetector:
             
             results = self.detect_crops(temp_path)
             
-            import os
             if os.path.exists(temp_path):
                 os.remove(temp_path)
             
